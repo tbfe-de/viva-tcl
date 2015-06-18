@@ -25,8 +25,8 @@ Don't hold me responsible if anything you learn or derive from the code fails.
 ## Future Directions
 
 Surely there are still errors in the presentation - from typos to duplicated or
-missing words, and maybe some could be improved (I'm not a native speaker of the
-English language).
+missing words, and maybe some wording could be improved too. (I'm not a native
+speaker of the English language).
 
 If you want to point out errors or have ideas for improvments, feel free to get
 touch with me.
