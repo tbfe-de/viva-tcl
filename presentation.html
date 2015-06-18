@@ -1,0 +1,4748 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Tcl for Vivado Users</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <!-- when changing the stylesheet file please see also remark below -->
+    <link rel="stylesheet" type="text/css" href="styling.css" />
+  </head>
+  <body>
+<!-- :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+<!-- :::::::::: template pages come first ... skip to REALCONTENT ::::::::: -->
+<!-- :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+<textarea id="source">
+
+layout: true
+name: blank
+styling: styling.css
+styling-by: Martin Weitzel
+
+<!--
+  *****************************************************************************
+  Template used for title page (only)
+  *****************************************************************************
+  Please change the 'styling-by:' attribute if you change the style-sheet.
+-->
+
+.stylehint[
+Styled with [{{styling}}]({{styling}}) by {{styling-by}}
+]
+
+---
+layout: true
+name: plain
+copyright: (CC) BY-SA
+branding:  [Dipl.-Ing. Martin Weitzel](http://tbfe.de) &#8199;&#8199;&#8199;&#8199;&#8199; PLC2-DAYS 2015
+customer:  [PLC2 – Programmable Logic Competence Center](http://plc2.com)
+
+<!--
+  *****************************************************************************
+  Template used for for pages NOT referring to any Info-Graphic
+  *****************************************************************************
+  The following attributes are mandatory FOR THE TEMPLATE PAGE and should
+  simply be left empty if not meaningful.
+
+  copyright: will be reproduced in each page footer first
+  branding: will reproduced in each page footer next
+  customer: will be reproduced in each page footer last
+
+  As the above attributes are part of several page templates a global replace
+  should be used for consistent changes.
+
+  On pages USING THIS TEMPLATE the following attributes must be set:
+
+  header: ## and header text (i.e. including the markdown formatting indicator)
+
+-->
+
+{{header}}
+
+.pagefooter[
+{{copyright}}: {{branding}} .plc2-logo[{{customer}}]
+]
+
+---
+layout: false
+template: blank
+name: frontmatter
+
+.title[
+	Tcl by Example._[]
+]
+
+.subtitle[
+	An Introduction to Using Tcl as  
+	Tool Command Language for Vivado
+]
+.author.pull-left[
+	Durchführung:  
+	Dipl.-Ing. Martin Weitzel  
+	Technische Beratung für EDV  
+	http://tbfe.de  
+
+]
+.client.pull-right[
+	2015-06-18  
+	All Programmable PLC2-Days  
+	Programming Logic Competence Center  
+	http://plc2.com
+
+]
+
+.F[:
+You may download this presentation from the
+[Author's Internet Site](http://tbfe.de/archive)
+for any use in compliance with the
+[Creative Commons BY-SA License](http://creativecommons.org/licenses/by-sa/2.0/).
+As it has been created using the free HTML4-Tool [Remark](http://remarkjs.com),
+its content is written using the
+[Markdown-Syntax](http://daringfireball.net/projects/markdown/syntax),
+so you may even enhance the purely electronic (non-printed) form with your own
+annotations, only by means of any ordinary text editor. Just hit the P-key while
+viewing this in an internet browser, and follow instructions.
+]
+
+???
+
+(use +/- above to adjust the font size for convenient reading)
+
+Remark allows to add presenter notes to each page. As that feature is **not**
+used by the author of that presentation, it is available for private annotations
+from [this page](#content) on.
+
+Assuming you have downloaded and stored this presentation as HTML-file, proceed
+as follows:
+
+* Open the file in a text editor of your choice.
+
+* Locate the page which you want to annotate.
+
+  * You may do so by just scrolling down (but often it is easier to)
+  * use the text search feature of your editor.
+
+* Locate the separator to the next page (i.e. `---` in a line of its own).
+
+* Before that add another line with three question marks (`???`) only.
+
+Between these to separator lines you can put your annotations and view these
+by using as you just view this page.
+
+**Hint:**
+Indent code examples with four spaces at the beginning of each line and they
+will be displayed with their original line breaks. As an example, below the
+page structure including annotations is shown:
+
+    template: plain
+    name: used_for_internal_links
+    header: ## Shown at the Top of the Page
+
+    Simply scroll down through this document loaded in an editor and you will
+    probably catch the basics of Markdown-Syntax easily, e.g.  how to put in
+    *slight* or **strong** emphasis or [add a link](http://tbfe.de/downloads).
+
+    ???
+    From here follow the [Presenter Notes], i.e. your private annotations
+    ...
+    ...
+
+    [Presenter Notes]: adding-longer-links-that-keeps-text--uncluttered
+
+    ...
+    up to here.
+    ---
+
+To return to the normal view, now press the P-key once more.
+
+<!--
+If you want to put in meta-annotations, i.e. text that is not even shown
+after pressing the P-key, simply use HTML comments, like it is done here.
+-->
+
+---
+template: plain
+class: agenda
+name: content
+header: ## Agenda
+
+------------------------------------------------------------------------------
+
+1. [Tcl-Vivado Integration – The Basics	](#tcl_vivado_basics)
+
+2. [The Programming Language Tcl  	](#tcl_programming_language)
+
+3. [The Tcl Standard Library 		](#tcl_standard_library)
+
+4. [Using Tcl in Vivado and Beyond   	](#tcl_in_vivado_and_beyond)
+
+------------------------------------------------------------------------------
+
+Each part consists of some "theory" or background information and is enhanced
+by practical demonstrations, for which is left sufficient room in the time
+slot.
+
+You are welcome to contribute – with your questions._[] and also proposals
+what to try or which small changes to make, to see the outcome.
+
+.F[:
+Your questions will of course be answered to the best of the speaker's
+abilities … and – on request – also in private communication during the breaks
+between the four parts.
+]
+
+------------------------------------------------------------------------------
+
+
+---
+template: plain
+name: tcl_vivado_basics
+header: ### Part 1: Tcl-Vivado-Integration – The Basics
+
+------------------------------------------------------------------------------
+
+* [A Look at Tcl's Internal Structure 		](#tcl_internal_structure)
+* [Chances for Tools (like Vivado) 		](#tcl_chances_for_tools)
+* [Tcl Limitations (for Tool Users) 		](#tcl_limitations_in_tools)
+* [Chances (not only) for Tcl-Aficionados 	](#tcl_chances_for_all)
+* [Tcl's Minimal Syntax				](#tcl_minimal_syntax)
+* [Variables and Subroutines (quickly._[])	](#var_subroutine_quickly)
+* [Three Ways of Quoting			](#three_ways_of_quoting)
+* [Syntax (Summary and Wrap-Up)			](#syntax_summary)
+* [Trying and Understanding Tcl			](#discovering_by_example)
+
+------------------------------------------------------------------------------
+
+**Note:** All of the above will get practical coverage through the presentation.
+Any question is welcome, especially if it leads to varying the examples used
+(that way controlling how much emphasis is put onto which topic).
+
+.F[:
+This will be expanded in [Part 2](#tcl_programming_language).
+]
+
+---
+template: plain
+name: tcl_internal_structure
+header: ### A Look at Tcl's Internal Structure 
+
+Understanding a little bit of Tcl's Internal Structure is helpful to get the
+big picture how Tcl is integrated into tools like Vivado.
+
+* Basically all (textual) input undergoes
+  [Syntax Analysis](#tcl_minimal_syntax),
+* including some relatively simple substitutions,
+* the first word is looked-up in a table as name of a command,
+* which is finally executed.
+
+.N[
+The command may be some Tcl subroutine – defined by the user or at startup of
+a tool in a configuration file – or it may be implemented in C/C++ and made
+available in a shared library (DLL).
+]
+
+---
+template: plain
+name: tcl_chances_for_tools
+header: ### Chances for Tools (like Vivado)
+
+[Extended by Tools]: Tcl_Vivado_Integration.png
+
+Tcl lends itself perfectly to be [Extended by Tools] (like Vivado):._[]
+
+* The look-up table consulted at the end of syntax analysis just needs to refer
+  to tool-specific commands, in addition to (or instead of) what is built-in.
+
+* Vivado uses this extensively, adding a huge number of Tool specific commands.
+
+.N[
+The latter are **not** the main topic of the following presentation, its focus
+what Vivado users need to know to cope with Tcl in general.
+]
+
+.F[:
+Not to much surprise, as this was an original goal of Tcl's initial design
+by [John Ousterhout](http://de.wikipedia.org/wiki/John_Ousterhout).
+]
+
+---
+template: plain
+name: vivado_tcl_documentation
+header: #### Vivado Tcl Documentation
+
+For more information on the Tcl Vivado Integration see the following Vivado User Guides:
+
+* [Using Tcl Scripting](http://www.xilinx.com/support/documentation/sw_manuals/xilinx2015_1/ug894-vivado-tcl-scripting.pdf)
+
+* [Tcl Command Reference](http://www.xilinx.com/support/documentation/sw_manuals/xilinx2015_1/ug835-vivado-tcl-commands.pdf)
+
+* [Using Constraints](http://www.xilinx.com/support/documentation/sw_manuals/xilinx2015_1/ug903-vivado-using-constraints.pdf)
+
+The first – ug894 (~70 pages) – introduces Tcl from the Vivado perspective, but
+is far from exhaustive with respect to Tcl.
+
+The second – ug835 (1000+ pages) – is exhaustive with respect to the commands
+Vivado adds to Tcl, but most of it directly refers to the design objects (as
+represented in the internal database) on which the XILINX design flow for FPGAs
+is based.
+
+The third – ug903 (172 pages total) – in some of its parts covers Tcl scripting
+in the special area of specifying [Design Constraints](#more_uses_of_tcl).
+
+---
+template: plain
+header: #### Running Tcl from Vivado
+
+An interface to Tcl is provided by Vivado in several forms:
+
+* By using the Tcl console provided by Vivado.
+
+* By choosing an start-up option (like `-tcl` or `-batch`) and control every
+  action of Vivado from Tcl.
+
+* By switching between the Vivado GUI and Tcl Scripting with the commands:
+
+  * `stop_gui` – issued from Vivado's Tcl console
+  * `start_gui` – issued from Vivado's direct scripting mode
+
+.N[
+The Tcl console in the Vivado GUI has many useful options not provided in
+direct scripting mode, like extended syntax highlighting and context dependent
+completion and help features.
+]
+
+---
+template: plain
+header: #### User Communities
+
+More information on Tcl is available in user communities like these:
+
+* The Tcler's Wiki – general Tcl (and Tk) topics  
+  at http://wiki.tcl.tk
+
+* The XILINX Tcl Store – with focus on using Tcl with XILINX products  
+  at http://www.xilinx.com/products/design-tools/vivado/Tcl-store.html
+
+.N[
+Of course, you may also start a general search with your Tcl questions by using
+[Google] or any of its competitors, or visit less specific but usually well
+informed communities, like [StackOverflow].
+]
+
+[Google]: https://www.google.de/#q=Tcl%2FTk
+[StackOverflow]: http://stackoverflow.com/questions/tagged/tcl
+
+---
+template: plain
+name: tcl_chances_for_all
+header: ### Chances (not only) for Tcl-Aficionados
+
+As you has made it up to here, it is assumed you want to learn Tcl for making
+improved use of Vivado, so:
+
+.N.center[
+Why not use Tcl and possibly Tk for other purposes?
+]
+
+You could – e.g. – use the knowledge acquired some day also for
+
+* writing small tools to automate recurring (… *stupidly repeating, terribly
+  boring, mostly uninteresting* …) tasks of your daily work,
+
+* provide *easy to use interfaces* for users in technical environments, but with
+  lesser affinity to scripting, or
+
+* implement parts of the software for an embedded device based on a ZYNQ-board
+  in Tcl(/Tk).
+
+---
+template: plain
+header: #### Tcl Outside Vivado – Example 1
+
+You need to debug, maintain and occasionally improve somewhat complex,
+automated Vivado design flow based in Tcl Scripting?
+
+* Provide the necessary hooks on the Vivado side,
+
+* instrument your Tcl script in Vivado accordingly,
+
+* and add an external Tcl/Tk client to filter debug- and trace-information
+  and further inspect what`s going on in Vivado.
+
+.N[
+Has been done – by the author of this._[] … and others probably too.
+]
+
+.F[:
+With respect to the Tcl client – the application monitored and debugged was
+a C++ application with concurrently running C++ processes under the control of
+a supervising server, coordinating the TCP/IP interface.
+]
+
+---
+template: plain
+header: #### Tcl Outside Vivado – Example 2
+
+For an embedded device, with a 4" touch touch screen, running a Linux based
+application, implement the high-level control logic including the GUI in Tcl/Tk.
+
+* Large parts of the development work can be done without access to the
+  real hardware:
+
+  * Either on a hosted Linux Version (chose your favorite – Tcl/Tk is available
+    not only on Linux but on most any U*ix based OS, like BSD, Mac …) …
+  * … or on Windows (e.g. using the Tcl/Tk implementation freely available from
+    [Active State].
+
+* You may show a prototype early to your customer,._[] with the option to shift
+  time critical parts closer to the hardware (Tcl → C/C++ → driver or kernel
+  module → FPGA logic design → dedicated electronic circuits).
+
+.N[
+Has been applied – by the author of this._[] … and others probably too.
+]
+
+[Active State]: http://www.activestate.com/activetcl
+
+.F[:
+You may even try it out – at least partially … but don't go too far, some
+customers might think the real bulk of work has already been done.
+]
+
+---
+template: plain
+header: #### Tcl Outside Vivado – Example 3
+
+For an embedded device without any real user interface (except, maybe, some few,
+tiny buttons and LEDs) but an Ethernet jack
+
+* provide a socket based communication *from* the embedded device
+* *to* some convenient control application running on a PC or Linux Host.
+
+.N[
+This can be done – and has been done – fully in Tcl/Tk by the author of this
+and others probably too.
+]
+
+You definitely **need no expertise** in any of the following areas:
+
+* providing and configuring some web-server like *Apache* and/or
+* using *PHP, Pearl, Python, … whatever* on the embedded side;
+* programming the control application in *JavaScript, Ruby, …  whatever*.
+
+.center[
+**To put it 100% clear:**
+
+All of your code will be Tcl (when using Tk for the GUI).._[]
+]
+
+.F[:
+Of course, you have also the *option* to use Tcl on the client-side only, or for
+the control application only, especially the latter, if you want to control your
+embedded device from every standard web browser … but then, of course, you might
+have to learn a bit of HTML and JavaScript, at least.
+]
+
+---
+template: plain
+name: tcl_limitations_in_tools
+header: ### Tcl Limitations (for Tool Users)
+
+The use of Tcl as command language in a tool also has a drawback.
+
+* Every input first passes through Tcl's syntax analysis, especially with
+  respect to the
+
+  * the [spelling of identifiers](#correct_quoting)
+    (e.g. permissible characters), and
+  * some characters that have a [special meaning](#special_sq_brackets)
+    (like apostrophes, brackets …)
+
+* This may – in small areas – collide with the conventional use of the above
+  in the domain specific use in other languages (like VHDL or Verilog), tool
+  users are accustomed to
+
+.N[
+As Tcl is *open and extensible* in a number of ways, Vivado is even able to
+resolve some of these drawbacks, while others must be accepted by Vivado users,
+who have to learn how to avoid adverse effects.
+]
+
+---
+template: plain
+name: tcl_minimal_syntax
+header: ### Tcl's Minimal Syntax
+
+The Tcl syntax is minimal in various aspects – these are its main steps:
+
+1. [Line Concatenation](#line_concatenation)
+
+1. [Command Separation](#command_separation)
+
+1. [Word Separation](#word_separation)
+
+1. [Substitutions of](#substitutions)
+
+  * [Non-Printing Characters](#subst_nonprinting)
+  * [Variables by Content](#subst_vars_by_content)
+  * [Subroutines by Return Value](#subst_return_values)
+
+Alongside the above, [Several Kinds of Quoting](#kinds_of_quoting)
+are honoured:._[]
+
+  * [Backslash-Quoting](#backslash_quoting)
+  * [Restricted Quoting](#restricted_quoting)
+  * [Full Quoting](#full_quoting)
+
+.F[:
+Each kind of quoting has its specific effects, as will be detailed soon.
+]
+
+---
+template: plain
+name: basic_example
+header: #### A Basic Example
+
+The following example will be used in many variations for a detailed coverage of
+the Tcl syntax:
+.pull-left[
+```
+set greet "hello, world"
+puts $greet
+```
+]
+.pull-right[
+The output – of course – is:
+```
+hello, world
+```
+]
+
+.pull-left[
+All output will be in a line of its own, i.e. `puts` automatically adds a newline
+at the end,._[] unless …
+]
+.pull-right[
+… it is requested **not** to do so:._[]
+```
+puts -nonewline $greet
+```
+]
+
+**From here on, please pay close attention to the presentation!**
+
+.N[
+In addition to the print-outs in your hands a lot more can be learned following
+the "live examples" given by the speaker.
+]
+
+.F[:
+Another difference, not relevant for the moment, is this: Any output to the
+screen is buffered and not actually visible until a newline is printed. Some
+consequences of this and how they can be avoided will be demonstrated later.
+]
+
+
+---
+template: plain
+name: line_concatenation
+header: #### Line Concatenation
+
+Line concatenation takes place if a line ends with a backslash.
+
+With the current knowledge of Tcl this can be demonstrated as following:
+.pull-left[
+```
+puts\
+$greet
+```
+]
+.pull-right[
+```
+puts \
+$greet
+```
+]
+
+Looking closely to spot the difference between the command on the left and on
+the right should reveal that the newline character after the back-slash is not
+completely purged but replaced by a space, explaining why all the following
+commands result in errors, but each for a different reason. 
+```
+pu\
+ts $greet ;# attempt to call the non-existing command 'pu'
+
+puts $\
+greet     ;# 'puts' gets two separate arguments, '$' and 'greet'
+
+puts $g\
+reet      ;# attempt to substitute a variable named 'g'
+```
+
+---
+template: plain
+name: command_separation
+header: #### Command Separation
+
+Next in the Tcl syntax analysis is looking for command separators.
+
+* Besides an unmasked(!) newline …
+
+* … also semicolons separate commands.
+
+As a trivial example, the following prints a prompt and then gets some
+interactive input:
+```
+puts "start from count: "; flush stdout; gets stdin count
+```
+
+.N[
+Usually in Tcl two commands are not written in the same line, unless they belong
+closely together and should not be accidentally separated.
+]
+
+```
+puts -nonewline $greet; flush stdout ;# show output unbuffered
+```
+
+.F[:
+A realistic example that makes it necessary to use `flush` is when the output
+of some program should become visible in small portions, but all in the same
+line, showing a "count-down":
+```
+  while {[incr count -1] > 0} { after 1000; puts -nonewline "$count .. " }; puts TAKING-OFF!
+```
+]
+
+---
+template: plain
+name: word_separation
+header: #### Word Separation
+
+Word separation has happened already in all the examples until here, but may not
+have been noticed.
+
+* Word separators are SPACE and TAB (in ASCII 0x20 and 0x09),
+
+* written adjacently any number of the above is a single separator.
+
+.pull-left[
+So all of the below equivalent:
+```
+puts $greet
+```
+```
+puts     $greet
+```
+```
+     puts $greet
+```
+```
+   puts     \
+   $greet
+```
+]
+.pull-right[
+.N[
+The option to insert more than one space._[] were a single one is sufficient is
+rarely used in Tcl.
+
+But sometimes the readability of regular and systematic code may improved by
+using columnar adjustments to align related parts.
+]
+]
+
+.F[:
+Using TAB instead of SPACE is discouraged or even banned in some style
+guides, because it usually depends on user preference set in the editor
+how they are expanded, hence code may look different for developers with
+different settings.
+]
+
+---
+template: plain
+name: substitutions
+header: #### Substitutions
+
+There are several kinds of substitutions with quite different purpose:._[]
+
+* Unprintable characters are substituted for some `\·`-sequences (basically
+  the same set as in C/C++).
+
+* Characters with a special meaning are substituted by themselves if preceded
+  by a backslash (i.e. taken verbatim without being special).
+
+* If `$` is followed by a variable name (composed from characters, digits,
+  or underscore) the content of that variable is substituted.
+
+* Any part of a command enclosed in square brackets will be taken as a (nested)
+  Tcl command of its own:
+
+  * it will be executed during the analysis of the embedding command, and
+  * its return value will be inserted in place of the whole unit.
+
+.F[:
+In addition, line concatenation (already covered) may also be seen as a kind of
+substitution.
+]
+
+---
+template: plain
+name: var_subroutine_quickly
+header: ### Variables and Subroutines (quickly)
+
+At that point, a quick (and not very complete) introduction to
+
+* Variables and
+
+* Subroutines
+
+makes sense, as otherwise not many meaningful examples are possible
+
+.N.center[
+Both topics will get additional and deeper coverage in
+[Part 2](#tcl_programming_language).
+]
+
+For now, they are in kind of "cookbook-style", as suggested by the live
+examples.
+
+---
+template: plain
+name: variables_quickly
+header: #### Variables (quickly)
+
+Variables are **defined** and their content can be **substituted**.
+
+To define a variable the Tcl command `set` is used:
+
+* It can have one or two arguments.
+
+  * The first is the name of the variable.
+  * The second (if present) is the new value.
+
+* It always returns the value (current or new).
+
+To substitute the current value of a variable, its name is preceded by a dollar
+sign:
+```
+set greet "hello, world"
+puts $greet              ;# shows 'hello, world' on the console
+set greet "Guten Morgen"
+puts $greet              ;# shows 'Guten Morgen' on the console
+```
+
+.W[
+Accessing unset variables cause an error that will terminate a Tcl script or
+bring interactive users back to the prompt-level.
+]
+
+---
+template: plain
+name: subroutines_quickly
+header: #### Subroutines (quickly)
+
+From the caller's perspective, a Tcl command can be anything:
+
+* a built-in command implemented in C or C++ (provided by the Tcl core or the
+  tool that uses Tcl as its command language);
+
+* a subroutine implemented in Tcl,
+
+  * either of from the [Tcl Standard Library](#tcl_standard_library)
+  * or (again) supplied by a specific tool using Tcl as command language;
+
+* a subroutine implemented in Tcl and previously defined by the same script that
+  also calls it.
+
+.N[
+In any case the [Tcl Syntax Analysis](#tcl_minimal_syntax) will identify **what
+is to call** by the **first word**, while **more words** are arguments and
+**handed over to the subroutine** to be used inside for any purpose.._[]
+]
+
+.F[:
+Note that exactly that is an attractive feature of Tcl, as it allows for
+"incremental learning": the Tcl syntax itself is minimal and can be fully
+comprehended in little over an hour. Everything else to learn is part of some
+command and hence depends on what is required to solve the particular problem
+in hand.
+]
+
+---
+template: plain
+name: predefined_subroutines
+header: ##### Pre-Defined Subroutines
+
+As any existing Tcl command is a subroutine too, and executed as any subroutine
+is executed, the basics can be easily understood by what has been used so far:
+
+```
+set x 10  ;# calling subroutine 'set' with arguments 'x' and '10'
+          ;# to the effect that variable x is set to 10
+incr x    ;# calling subroutine 'incr' with argument 'x'
+          ;# to the effect that variable x is incremented by 1
+incr x -5 ;# calling subroutine 'incr' with arguments 'x' and '-5'
+          ;# to the effect that variable x is decremented by 5
+puts $x   ;# calling subroutine 'puts' with an argument that is the
+          ;# substituted content of variable x
+```
+
+.N[
+Any subroutine returns a value, which is directly shown for commands
+entered interactively, but discarded if a command is part of a script.._[]
+]
+
+.F[:
+Note that this may be changed when Tcl is used inside a tool. E.g. on some
+occasions Vivado shows all the command executed on behalf of a script.
+]
+
+---
+template: plain
+name: predefined_subroutines
+header: #### Using Command Substitution
+
+To understand command substitution (`[ … ]`) it is necessary to know what a
+subroutine returns:
+
+* `set` and `incr` – as used the last page – return the new value assigned with
+  by that operation;
+* `set` with only one argument returns the current value of the variable;
+* `puts` returns and empty string.
+
+Knowing this, it should be easy to tell what will be the effect of the following
+commands (continuing from the last page):._[]
+```
+puts [incr x]             ;# prints 7 (10+1-5+1) to the console
+puts [set x]              ;# prints 7 (content of x) to the console
+puts [set x 1]            ;# sets variable x to 1 and prints 1
+                           # (new content of x) to the console
+puts -nonewline [puts $x] ;# a contrived way to do 'puts $x' ...
+puts [puts $x]            ;# ... as before, plus another newline
+```
+
+.F[:
+Well, may be not *quite* easy in the last two examples, but feasible – the key
+point is to understand the difference between commands that print something on
+the console (`puts`) and the return value of commands (any command has one).
+]
+
+---
+template: plain
+name: defining_subroutines
+header: #### Defining Subroutines
+
+[parameters]: https://www.tcl.tk/man/tcl/TclCmd/info.htm#M5
+[body]: https://www.tcl.tk/man/tcl/TclCmd/info.htm#M6
+
+Subroutines are defined with the command `proc`, followed by
+
+* the name that will later be used to execute (call) them,
+* the list of their formal *[parameters]*, and
+* the Tcl code that contributes their *[body]*.
+
+As the topic gets its real coverage only in the next part, the following example
+does something rather unusual:
+```
+proc = {args} {
+    foreach arg $args {
+        puts "[incr n]:>$arg<:"
+    }
+}
+```
+.N[
+It defines a command **with the exotic name `=` (i.e. an equals sign)**, which
+does nothing but print its arguments:._[]
+]
+
+.F[:
+Note that up to Tcl version 8.4 it was necessary to `set n 0 zero before
+entering the `foreach` loop. Since Tcl 8.5 `incr` assumes for an unset
+variable it will start with zero.
+]
+
+---
+template: plain
+header: #### The Final Command Line
+
+Understanding what is actually executed when Tcl executes a command – **i.e.
+what the final command line looks like after syntax analysis and when all
+substitutions are done** – is crucial for understanding the Tcl syntax.
+
+.N.center[
+The subroutine `=` defined on the last page can help here.
+]
+
+Try it as follows:._[]
+```
+= set greet
+= set $greet         ;# assuming greet is set to some value
+= set greet whatever ;# this, of course, will NOT change greet ...
+= puts [incr greet]  ;# ... OTH, this WILL change greet (why?)
+```
+
+.F[:
+What makes an interesting experiment is to use `=` with its own definition:
+
+```
+   = proc = args {
+    set n 0
+    foreach arg $args {
+        puts "[incr n]:>$arg<:"
+    }
+}
+```
+]
+
+---
+template: plain
+header: #### Intermezzo: "Funny Names" (1)
+
+Unlike most any other programming language Tcl does not restrict what the name
+of a function or variable has to look like, because
+
+* accessing variables and
+* executing functions
+
+is "table lookup" only, where the name serves just as key and therefore can be
+everything.._[]
+
+.N[
+Except for rare cases it does not seem advisable to exploit that freedom.
+]
+
+Whether the subroutine from the last page deserves a "funny name", or rather a
+regular one like `show_args`, is disputable.
+
+The name "`=`" was used to point out that it does nothing with a real purpose …
+except to help Tcl-beginners to understand how a command looks **after** the
+[Tcl Syntax Analysis](#tcl_minimal_syntax) is done and substitutions took their
+effect.
+
+.F[:
+Also note that procedures and variables with the same name may coexist, since
+they are looked up in different tables.
+]
+
+---
+template: plain
+header: #### Intermezzo: "Funny Names" (2)
+
+As a general rule: **Avoid unusual names** – even if Tcl supports them – and
+stay with the rules of most high-level programming languages:
+
+.N.center[
+Compose name identifiers from letters, digits and underscore only.._[]
+]
+
+Having said that, it might *sometimes* be convenient or even elegant to use
+"funny names", especially
+
+* for **variables** that store kind of "internal secrets" and are not expected
+  to be touched or modified often,
+* for **subroutines** that do something very unusual or special, so the pure
+  sight of the name should alert about this.
+
+Hint: a nifty way to temporarily remove a subroutine **definition**, maybe to
+find out in which way other code depends on it, is to prepend a `#` to its name
+(not the `proc` command, this would only comment out one line).
+
+.F[:
+Besides readability this also is also necessary so that the content of variables
+can be easily expanded in the command line by prepending a `$` (dollar sign)..
+Variable names **not** only consisting of letters, digits and underscore need to
+be enclosed in curly braces when used after `$`, while for subroutine no special
+care needs to be taken. And finally, as crazy as it may sound: it is even
+possible to use an empty string as name – just write an empty pair of curly
+braces or two adjacent double quotes where the name is expected.
+]
+
+---
+template: plain
+name: three_ways_of_quoting
+header: ### Three Ways of Quoting
+
+There is one element in Tcl Syntax Analysis that has been ignored so far.
+
+.N.center[
+**Quoting**
+]
+
+Basically quoting allows to hide parts of a command line from ordinary syntax
+analysis, so these parts show up verbatim, when a command is executed and its
+arguments are handed over.
+
+* [Quoting with a (preceding) back-slash](#backslash_quoting)
+
+* [Quoting with (surrounding) double quotes](#doublequote_quoting)
+
+* [Quoting with (surrounding) curly braces](#curlybrace_quoting)
+
+Each one makes sense depending on the context and which parts of a command needs
+to outlive syntax analysis.
+
+---
+template: plain
+name: backslash-quoting
+header: #### Quoting with Backslashes
+
+This is a variant and extension of what was already explained in the sections on
+[Line Continuation](#line_concatenation) and
+[Non-Printing Characters](#subst_nonprinting).
+
+Any following character will be taken verbatim, i.e.
+
+* the backslash is removed, and
+
+* the character following is released from its special function,
+
+* (assuming it has any, otherwise it simply stands as it is).
+
+.N[
+Note that the backslash may also be used to quote itself.
+]
+
+More will be demonstrated on the page showing
+[Quoting by Examples](#quoting_by_example).
+
+---
+template: plain
+name: doublequote_quoting
+header: #### Quoting with Double Quotes._[]
+
+Until the next **unquoted** double quote._[]
+
+* **no** newline or semicolon will be taken as **command separator**,
+* **no** horizontal white space._[] will be taken as **word separator**, and
+* **no reduction of** adjacent **horizontal white space** to a single space
+
+takes place, though their special function still have
+
+* **backslashes**  
+  for producing non-printing characters and for quoting,
+* **dollars signs**  
+  for substituting the content of a variable, and
+* **square brackets**  
+  for evaluating what is inside as separate command and substituting the return
+  value.
+
+.N[
+More will be demonstrated on the page showing
+[Quoting by Examples](#quoting_by_example).
+]
+
+.F[:
+Double quotes are what in German is known as *Gänsefüßchen*.
+]
+
+---
+template: plain
+name: curlybrace_quoting
+header: #### Quoting with Curly Braces
+
+It this way
+
+  * every character inside is released from its special function in the
+    [Tcl Syntax Analysis](#tcl_minimal_syntax),
+
+  * except that **contained** curly braces are counted to find the *final*
+    closing brace, matching the *first* opening brace, and
+
+  * back-slashes **do not change any content** inside the curly braces,._[]
+
+    * but **disable counting**,
+    * if used directly to the left of a curly brace.
+
+.N[
+More will be demonstrated on the page showing
+[Quoting by Examples](#quoting_by_example)
+]
+
+.F[:
+No matter whether the backslash precedes an opening or closing curly brace or
+is itself preceded by another backslash. This makes it impossible in Vivado to
+[end a curly brace quated range with a single backslash](#correct_quoting).
+]
+
+---
+template: plain
+name: quoting_by_example
+header: #### Quoting by Example (1)
+
+The best way to demonstrate the effects of quoting is with a subroutine which
+simply prints its arguments, like the one defined [here](#defining_subroutines):
+.pull-left[
+Try the following:
+```
+= puts "hello, world"
+= puts hello,\ world
+= puts {hello, world}
+= puts hello, world
+= puts ""
+= puts
+```
+]
+.pull-right[
+.N[
+The command `puts` – in the form used here._[] – expects **exactly one**
+argument, which may be any string and will printed verbatim on the console
+(followed by newline character).
+]
+]
+
+Be sure to understand that (without the "`=`") `puts` would receive
+
+* exactly one argument in the first three examples, and
+* **cannot see the difference in quoting(!)**,
+* two arguments in the fourth example (so it were an error),
+* one (empty string) argument in the fifth example, and
+* no argument at all in the last example (so it were an error).
+
+.F[:
+Besides supplying the option `-nonewline` it is legal to use `puts` with two
+arguments, if the first one refers to an open file, as will be demonstrated in
+[Part 3](#tcl_standard_library).
+]
+
+---
+template: plain
+name: quoting_by_example
+header: #### Quoting by Example (2)
+
+Also try the following …
+.pull-left[
+```
+= puts \n
+= puts "  "
+= puts hi! ;# ho!
+= puts "hi! ;# ho!"
+= puts {}
+= puts {{}}
+= puts "{}"
+= puts "\""
+= puts \\
+= puts "\\"
+= puts {\\}
+```
+]
+.pull-right[
+```
+= { now see { that }! }
+= { now see " that "! }
+= " now see { that }! "
+= " now see " that "! "
+= {1" is 25,4mm}
+= "1\" is 25,4mm}
+= 1\"\ is\ 25,4mm
+= {count {the} braces}
+= {count {all {the}} braces}
+= {count {all? the\}} braces}
+= {count \{all? the\} braces}
+```
+]
+
+… and request (many) more demonstrations – with explanations from the speaker –
+if you think it helps to get a good understand of Tcl's quoting rules.
+
+---
+template: plain
+name: syntax_summary
+header: ### Syntax (Summary and Wrap-Up)
+
+[Tcl and the Tk Toolkit]: http://www.amazon.de/Tcl-Toolkit-Addison-Wesley-Professional-Computing/dp/032133633X
+
+As John Ousterhout states in his book "[Tcl and the Tk Toolkit]", some
+difficulties a Tcl novice may have stem from the assumption, the syntax must be
+more complex as it actually is.
+
+Tcl-Syntax can be described very briefly as:
+
+* Looking-up separators (for commands and words)
+* Doing substitutions (variable content and command return values)
+* All the way paying attention to quoting (`\`, `" … "`, `{ … }`)
+
+Plus one more rule – may be an even more important one with respect to
+simplicity: **Do not repeat any of the above, once it is done.**
+
+Therefore – and because looking up separators happens before variables
+and command return values are substituted – the following …
+```
+proc say_goodbye {} { return "and thanks for all the fish" };
+puts [say_goodbye]
+```
+…  hands **exactly one argument** to `puts`, not five.
+
+---
+template: plain
+name: discovering_by_example
+header: ### Trying and Understanding Tcl
+
+From the author's point of view, one of the biggest advantages of Tcl over a
+compiled language like C or C++._[] is this.
+
+Most things in Tcl are easy to try – just start a `tclsh`._[]
+and enter examples of the commands you want to
+understand.
+
+.N.center[
+The key word here is **understand**.
+]
+
+Trying *"to understand"* does not mean get something to work by using
+*"trial and error"* only!
+
+* You may well try and vary and try again and vary again … only
+
+* **in the end** you should not any longer be surprised
+
+  * **why it works,** and
+  * **how it works**
+
+* but be able to [explain it] to your colleagues, or at least to yourself.
+
+[explain it]: Tcl-Syntax_as_Statechart.png
+
+.F[:
+Or `wish` if you build a GUI based on Tk.
+]
+---
+template: plain
+name: tcl_programming_language
+header: ### Part 2: The Programming Language Tcl
+
+------------------------------------------------------------------------------
+
+* [Understanding the Syntax (quickly._[])	](#syntax_quickly)
+* [Essential Data Structures			](#data_structures)
+* [Flow Control					](#flow_control)
+* [Subroutines					](#subroutines)
+* [Error Handling				](#error_handling)
+* [Organising Reuse				](#reusable_parts)
+
+------------------------------------------------------------------------------
+
+**Note:** All of the above will get coverage through practical "live" examples
+during the presentation, and all attendees are invited to contribute proposals
+especially how to vary a certain example or what else to try – of course with
+the effects and final results always explained by the speaker.
+
+.F[:
+This is a *very short and condensed* recapitulation of the section on the
+[Tcl Syntax](#tcl_minimal_syntax), for all who missed attending to
+[Part 1](#tcl_vivado_basics).
+]
+
+---
+template: plain
+name: syntax_quickly
+header: ### Understanding the Syntax (quickly)
+
+.N.center[
+Why repeat anything in the era of electronic documents? We can link!
+]
+
+* For short summary of steps see [here](#tcl_minimal_syntax).
+
+* You will find more
+
+  * about command separation [here](#command_separation) …
+  * … and about word separation [here](#word_separation).
+
+* Substitutions that eventually may occur are detailed
+
+  * for non-printing characters [here](#subst_nonprinting),
+  * for variable content [here](#subst_vars_by_content), and
+  * for subroutine return values [here](#subst_return_values).
+
+* Finally you need to understand
+
+  * quoting – see [here](#three_ways_of_quoting),
+    with examples [here](#quoting_by_example), and
+  * that no step repeats, once completed – see [here](#syntax_summary).
+
+---
+template: plain
+name: data_structures
+header: ### Essential Data Structures
+
+Traditionally._[] there are two important ways to structure data in Tcl:
+
+* [Lists](#tcl_lists_101):  
+  essentially sequential containers (of strings), numerically indexable with
+  0-origin (so rather like native arrays in C/C++)
+
+* [Arrays](#tcl_arrays_101):  
+  essentially (string-based) look-up tables, aka. Hashes in some other
+  scripting languages (so rather like `std::map<string, string>` in C++)
+
+.F[:
+Recently Tcl has added another important data structuring mechanisms:
+[Dictionaries](https://www.tcl.tk/man/tcl/TclCmd/dict.htm).
+As these are not used in Vivado, they will receive no coverage in this
+presentation.
+]
+
+---
+template: plain
+name: tcl_lists_101
+header: #### Lists 101 - The Basics
+
+[`llength`]: https://www.tcl.tk/man/tcl/TclCmd/llength.htm
+[`lindex`]: https://www.tcl.tk/man/tcl/TclCmd/lindex.htm
+[`foreach`]: https://www.tcl.tk/man/tcl/TclCmd/lindex.htm
+
+Basically lists look similar to Tcl commands in that they may consist of any
+number of words:
+```
+set month_names "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec"
+```
+The commands most often applied to lists._[] are [`llength`] and [`lindex`]:
+```
+puts [llength $month_names]      ;# => 12
+puts [lindex $month_names 0]     ;# => Jan
+puts [lindex $month_names 1]     ;# => Feb
+puts [liindex $month_names 11]   ;# => Dec
+puts [lindex $month_names 12]    ;# => (empty string)
+puts [lindex $month_names end]   ;# => Dec
+puts [lindex $month_names end-1] ;# => Nov
+```
+
+Also, lists are often processed with [`foreach`], fully introduced
+[later](#cmd_foreach):
+```
+foreach month $month_names { puts $month }
+```
+
+.F[:
+NB: *"applied to lists"* (i.e. the content), not *"applied to list variables"* (the name), therefore `$month_names`!
+]
+
+---
+template: plain
+name: lists_101
+header: #### Lists 101 - Nested Lists
+
+If constructed properly, lists may also nest within each other, so with
+```
+set cities {Paris {New York} London Berlin}
+```
+
+the following  list elements can be accessed:
+```
+puts [llength $cities]    ;# => 4
+puts [lindex $cities 0]   ;# => Paris
+puts [lindex $cities 1]   ;# => New York
+puts [lindex $cities 2]   ;# => London
+puts [lindex $cities 3]   ;# => Berlin
+```
+
+As the second element (with index 1) is itself a list, its parts can also be
+accessed individually:
+```
+puts [lindex [lindex $cities 1] 0]   ;# => New
+puts [lindex [lindex $cities 1] 1]   ;# => York
+puts [lindex [lindex $cities 1] end] ;# => York
+puts [lindex [lindex $cities 2] 0]   ;# => London
+puts [lindex [lindex $cities 2] end] ;# => London
+```
+
+---
+template: plain
+name: lists_101
+header: #### Lists 101 - More on Nested Lists
+
+[`lset`]: https://www.tcl.tk/man/tcl/TclCmd/lset.htm
+
+It is also possible._[] to apply several indices to select from nested lists in
+a single `lindex` command:
+```
+# same effect as commands on last page
+…
+puts [lindex $cities 1 0]   ;# => New
+puts [lindex $cities 1 1]   ;# => York
+puts [lindex $cities 1 end] ;# => York
+…
+```
+
+This will also work with the [`lset`] command to modify elements of a list:
+```
+lset cities 0 "City of Love"  ;# Paris => City of Love
+lset cities 1 1 Amsterdam     ;# New York => New Amsterdam
+```
+
+.N[
+**NB:** As the `lset` command **modifies** a list, a variable name must be
+specified as argument (`cities`), **not its content** (`$cities`).
+]
+
+.F[:
+In more recent Tcl versions only, i.e. it was not originally a feature of Tcl, so
+you might not see it used in all applicable contexts.
+]
+
+---
+template: plain
+name: constructing_lists
+header: #### Lists 101 - Constructing Lists
+
+[`list`]: https://www.tcl.tk/man/tcl/TclCmd/list.htm
+
+Care has to be taken when lists are constructed from variables with arbitrary
+content.
+
+The following will **not** work as (possibly) expected:
+```
+set capital_of_AR "Buenos Aires"
+set capital_of_DE Berlin
+set capital_of_GB London
+…
+set capitals "$capital_of_AR $capital_of_DE $capital_of_GB"
+```
+
+A more careful approach will use the command [`list`], which **will** work as
+(probably) expected:
+```
+set capitals [list $capital_of_AR $capital_of_DE $capital_of_GB]
+```
+
+---
+template: plain
+name: extending lists
+header: #### Lists 101 - Extending and Shortening Lists
+
+[`lappend`]: https://www.tcl.tk/man/tcl/TclCmd/lappend.htm
+[`lreplace`]: https://www.tcl.tk/man/tcl/TclCmd/lreplace.htm
+
+Appending to a list should also always be done in a secure way:._[]
+```
+set cities "$cities $other" ;# bound to fail for arbitrary content
+lappend cities $other       ;# always applies the "right" quoting
+```
+
+Finally there is the command `replace`, which not only allows to do what its
+name seems to suggests …
+```
+puts [lreplace $cities end end Washington]
+puts [lreplace $cities 1 2 Paris Madrid Lissabon]
+```
+
+… but also allows for removing content:
+```
+puts [lreplace $capitals 1 2]
+```
+
+.N[
+Note that `lreplace` does **not modify the content** of a list variable but
+takes a list as argument and **returns** a modified list.
+]
+
+.F[:
+At least if neither the content of the list, nor the value appended is
+predictable in that it has no "problematic" content. E.g. assume `other`
+` may hold any value also something as weird as "`{\ \}}`").
+]
+
+---
+template: plain
+name: tcl_arrays_101
+header: #### Arrays 101 - The Basics
+
+Arrays are assumed by Tcl if a variable name follows a special pattern:
+
+* After the regular name of a variable
+* (without any space in between)
+* follows a pair of round parentheses, holding the index.
+
+.pull-left[
+An array index may be number …
+```
+set month(1) January
+set month(2) February
+…
+set month(12) December
+```
+
+… but also any string:
+```
+set days(January) 31
+set days(February) "28 or 29"
+…
+set days(November) 30
+set days(December) 31
+```
+]
+.pull-right[
+Using the value follows the same pattern as setting it …
+```
+puts $month(2)
+puts $days(November)
+```
+… but may also assume more complex forms, as the index may also come from
+another variable:
+```
+set i 12
+puts $month($i)
+puts $month([incr i -1])
+puts $days($month(February))
+```
+]
+
+---
+template: plain
+header: #### Arrays 101 - Nested Indices and Multiple Dimensions
+
+Actually indices can nest to any depth, which can be easily tested …
+.pull-left[
+```
+set i 1
+set j(1) 2
+set k(2) 3
+set v(3) "here i am"
+```
+]
+.pull-right[
+… that way:
+```
+puts $v($k($j($i)))
+```
+]
+
+Multiple array dimensions are not directly supported but may be easily simulated
+by
+
+*  writing two (or more) indices adjacent,
+* separated with some unique character.
+
+The only crux here is to find a separator for which it can be ensured that it
+will never be part of a valid index.
+.pull-left[
+```
+set x 12
+set y whatever
+set v($x|$y)
+```
+]
+.pull-right[
+**But ambiguity here!**
+```
+set x left| ; set y right
+set x left ; set y |right
+```
+]
+
+---
+template: plain
+header: #### Arrays 101 - Accessing a Whole Array
+
+[`array`]: https://www.tcl.tk/man/tcl/TclCmd/array.htm
+
+The Tcl command [`array`] has several subcommands, all accessing a whole array in
+some way:
+
+* `array size` *`name`* – returns number of entries in array
+
+* `array names` *`name`* – returns list of all indices in array
+
+* `array get` *`name`* - returns list of index-value pairs in array
+
+* `array set` *`name`* … - sets array from the list … of index-value pairs._[]
+
+* … (the above is not exhaustive) …
+
+.N.center[
+Feel free to propose examples of the above be demonstrated live and
+further explained by the speaker.
+]
+
+.F[:
+What do you think: will this first purge the old content or just add new indices
+and values, in case the array does already exists with some entries?
+]
+
+---
+template: plain
+name: flow_control
+header: ### Flow Control
+
+Flow control in Tcl allows for
+
+* conditional execution ([`if`](#tcl_cmd_if))
+* two-way or multi-way branches ([`if-else`](#tcl_cmd_if_chaining) or
+  [`switch`](#tcl_cmd_switch)), and
+* repetition in various flavours ([`while`](#tcl_cmd_while),
+  [`for`](#tcl_cmd_for), and [`foreach`](#tcl_cmd_foreach).
+
+Before each of the above is demonstrated with examples, it is instructive what
+our [good ol' helper used to demonstrate quoting](#defining_subroutines) will say
+here:._[]
+.pull-left[
+```
+= if {$i} {
+    # … whatever …
+} else {
+    # … whatever else …
+}
+```
+]
+.pull-right[
+```
+= while {[incr i -1] > 0} {
+    # … whatever …
+}
+= while {$i<10} {puts [incr i]}
+= while "$i<10" "puts [incr i]"
+```
+]
+
+<!-- -->
+```
+= for {set i 0} {$i < 10} {incr $i} { puts -nonewline "$i .. " }
+```
+
+```
+= foreach m [array names $months] { puts $m }
+```
+
+.F[:
+Assuming all used variables are set.
+]
+---
+template: plain
+name: expr_and_eval
+header: #### Intermezzo: `expr` and `eval`
+
+There are two things, one that is required very often but Tcl does not support
+directly, and second Tcl does implicitly all the time good but which needs
+sometimes run explicitly.
+
+* `expr` – **allows evaluation of arithmetic expressions**  
+  which the Tcl Syntax Analysis can not do directly but only through this
+  command;
+
+* `eval` – **evaluate an arbitrary string as commands**  
+  which the Tcl Syntax Analysis dos all the time for with the scripts it
+  executes but for flow control it needs to be available explicitly.
+
+.N[
+All flow control is **not** implemented as part of the Tcl Syntax but by
+separate commands.
+]
+
+In other words: If a Tcl script branches or repeats on some condition, from the
+perspective of the Tcl Syntax Analysis **always** some command gets started, which
+finally does what is expected.
+
+---
+template: plain
+name: cmd_expr
+header: ##### Evaluating Arithmetic Expressions
+
+[`expr`]: https://www.tcl.tk/man/tcl/TclCmd/expr.htm
+
+Only the command [`expr`] enables Tcl to evaluate arithmetic expressions, as
+demonstrated below (assume all variables used are appropriately set).
+
+.pull-left[
+Some basic examples:
+```
+puts [expr 1+1]
+puts [expr 1 + 1]
+puts [expr {1 + 1}]
+puts [expr {(7*12 - 18) / 32}]
+puts [expr {1.0 / 2.0}]
+```
+]
+.pull-right[
+Some more realistic usages.
+```
+set u [expr {$i + 2*$j}]
+set v [expr {sin(0.66)}]
+set w [expr {
+          $x == 0 ? 0 : $y/$x
+      }]
+```
+]
+
+Generally `expr` first concatenate all of its arguments to a single long string,
+which is then evaluated much similar to the expression syntax of C/C++.
+
+.N[
+Enclosing the argument in braces is not required but recommended, as it allows
+a more efficient evaluation in some contexts.._[]
+]
+
+.F[:
+The background is generating pseudo-code for a virtually machine Tcl uses
+internally, which has more chances for optimisation if Tcl variables as part of
+the arguments to `expr` are not evaluated at the "outer level" (i.e. variable
+substitution during syntax analysis) but at the "inner level" (inside the
+implementation of the command).
+]
+
+---
+template: plain
+name: cmd_bitops
+header: ##### Applying Bit Operations
+
+As `expr` also supports the bit manipulation operations from C, any necessary
+low level processing is possible.
+
+The following example counts how many bits are set in an integral value.
+.pull-left[
+Assuming `val` is unsigned …
+```
+set count 0
+while {$val} {
+    if {$val & 1} {
+        incr count
+    }
+    set val [expr {$val >> 1}]
+}
+```
+]
+.pull-right[
+… or assuming `val` has 32 bit:._[]
+```
+set count 0
+set i 32
+while {[incr i -1] >= 0} {
+    if {$val & (1<<$i)} {
+        incr count
+    }
+}
+```
+]
+
+<!-- -->
+
+.W[
+As right-shifting bits in a 2's complement integral number representation copies
+the sign bit, the example on the left side above may go in an endless loop for
+negative values.
+]
+
+.F[:
+The internal representation of integral numbers in Tcl typically uses native
+types of the underlying hardware, so the details (size, behavior of right-shift,
+etc.) depends on the implementation.
+]
+
+---
+template: plain
+name: cmd_eval
+header: ##### Evaluating Any String As Command
+
+[`eval`]: https://www.tcl.tk/man/tcl/TclCmd/eval.htm
+
+The command `eval` runs all the steps of [Syntax Analysis](#syntax_quickly)
+on a string handed over as argument.._[]
+
+A typical example is storing a frequently used command – or a part thereof –
+in a string and then execute it:
+```
+# example from Vivado Tcl Reference Guide (UG835)
+set runblocksOptDesignOpts { -sweep -retarget -propconst -remap }
+eval opt_design $runblocksOptDesignOpts
+```
+
+**Without** the use of `eval` above
+
+* command separators were looked-up only once,
+* before the content of `runblocksOptDesignOpts` is substituted,
+* therefore the blanks separating the options would not be properly recognized,
+  and finally
+* the Vivado command `opt_design` would complain about wrong usage.
+
+.F[:
+More exactly `eval` first concatenates all its arguments into one single string,
+then processes the result. It should be understood that using `eval` means there
+will be a **second pass** over the command line as originally spelled,
+"eating-up" one (more) level of quoting. Therefore, aside from the most simple
+cases, `eval` comes with its own set of potential pitfalls which must be
+carefully considered to be finally avoided.
+]
+
+---
+template: plain
+name: tcl_cmd_if
+header: #### Branches with `if` (and `if` – `else`)
+
+[`if`]: https://www.tcl.tk/man/tcl/TclCmd/if.htm
+
+The Tcl command(!) [`if`] basically does the following:
+
+* It hands over its **first** argument to [`expr`](#cmd_expr) for arithmetic
+  evaluation, and – depending on the outcome -
+* it hands over its **second** argument to [`eval`](#cmd_eval) for (further
+  syntax analysis and) execution.
+
+.N[
+A condition is `true` if the arithmetic evaluation does result in some value
+different from zero.
+]
+
+Examples for the two most basic forms follow below:
+.pull-left[
+Simple conditional execution, i.e. **one command block**, executed when
+the condition is `true` …
+```
+if {$x < 2*$y} {
+    … condition true
+}
+```
+]
+.pull-right[
+… and with **alternative command block** executed when the condition is `false`.
+```
+if {$x < 2*$y} {
+    … ;# condition true
+} else {
+    … ;# condition false
+}
+```
+]
+
+---
+template: plain
+name: tcl_cmd_if_chaining
+header: #### Chaining Branches with `if` - `elseif`
+
+Again, to understand what is really behind branch chaining, it makes sense to
+look which arguments are really handed over to `if`:
+.pull-left[
+```
+= if {$x == $a} {
+    … ;# x equal to a
+} elseif {$x == $b} {{
+    … ;# x equal to b
+} elseif {$x == $c} {{
+    … ;# x equal to c
+} else {
+    … ;# neither of above
+}
+```
+Note that in the output (right) the arguments received are enumerated starting
+from `1`.
+
+I.e. from the viewpoint of `if` it are the 1<sup>st</sup>, 4<sup>th</sup> etc.
+arguments that hold the conditions (not the 2<sup>nd</sup>, 5<sup>th</sup> etc.).
+]
+.pull-right[
+```
+1:>if<:
+2:>$x == $a<:
+3:>
+    … ;# x equal to a
+<:
+:4>elseif<:
+:5>$x == $b<:
+:6>
+    … #; x equal to b
+<:
+:7>elseif<:
+:8>$x == $c<:
+:9>
+    … ;# x equal to c
+<:
+:10>else<:
+:11>
+    … ;# neither of above
+<:
+```
+]
+
+---
+template: plain
+name: tcl_cmd_switch
+header: #### Branches with `switch`
+
+[`switch`]: https://www.tcl.tk/man/tcl/TclCmd/switch.htm
+
+The command [`switch`] is an alternative to branch chaining with `if`.
+
+Comparisons can be made in different ways, e.g. …
+
+.pull-left[
+… exact …
+```
+switch -exact -- $x {
+    $a {
+        … ;# x equal to a
+    }
+    $b {
+        … ;# x equal to b
+    }
+    $c {
+        … ;# x equal to c
+    }
+    default {
+        … ;# neither
+    }
+}
+```
+]
+.pull-right[
+… or similar to typical file name pattern matching …
+```
+switch -glob -- $f {
+    *.bit {
+        … ;# bitstream file
+    }
+    *.vhdl |
+    *.VHDL {
+        … ;# a vhdl file
+    }
+    *.[vV] {
+        … ;# verilog file
+    }
+}
+```
+]
+
+… or with regular expressions, for which an
+[example follows](#regex_example_switch) in [Part 3](#tcl_standard_library).
+
+---
+template: plain
+name: tcl_cmd_while
+header: #### Loops with `while`
+
+[`while`]: https://www.tcl.tk/man/tcl/TclCmd/while.htm
+
+Repeated execution of some code block with the command `while` is much similar
+to `if`:
+
+* It hands over its **first** argument **repeatedly** to [`expr`](#cmd_expr)
+  for arithmetic evaluation, and – depending on the outcome -
+* it hands over its **second** argument to [`eval`](#cmd_eval) for (further
+  syntax analysis and) execution.
+
+.N[
+The border case for `while` is no execution of the code block at all, if the
+condition evaluates to `false` from the start.
+]
+
+The following prints a count-down from 10, pausing for half a second  after each
+value.
+```
+set count 10
+while {$count > 0} {
+    puts -nonewline $count; flush stdout
+    after 500 ;# sleep 0.5 seconds
+    incr count -1
+}
+```
+
+---
+template: plain
+name: tcl_cmd_for
+header: #### Loops with `for`
+
+[`for`]: https://www.tcl.tk/man/tcl/TclCmd/for.htm
+
+Using the command `for` instead of `while` usually improves readability of loops
+running through a consecutive range of values, as in this example:._[]
+```
+# print 10 x 10 multiplication table
+for {set i 1} {$i <= 10} {incr i} {
+     for {set j 1} {$j <= 10} {incr j} {
+         puts -nonewline [format "%3d " [expr {$i * $j}]]
+         # puts + format is much like printf in C
+     }
+     puts ""
+}
+```
+
+.F[:
+Modified to use `while` the example would look like this:
+```
+   # print 10 x 10 multiplication table
+set i 1
+while {$i <= 10} {
+     set j 1
+     while {$j <= 10} {
+         puts -nonewline [format "%3d " [expr {$i * $j}]]
+         incr $
+     }
+     puts ""
+     incr i
+}
+```
+]
+
+---
+template: plain
+name: tcl_cmd_foreach
+header: #### Loops with `foreach` – The Basics
+
+[`foreach`]: https://www.tcl.tk/man/tcl/TclCmd/foreach.htm
+
+The command [`foreach`] specifically targets the processing of
+[Tcl Lists](#tcl_lists_101),
+
+Assuming a list `tm` of elements which in turn are sub-lists of two elements,
+holding a location and a temperature measurements, a detailed report with the
+average of all measurements at its end my be printed as follows:._[]
+```
+set sum 0.0
+foreach measurement $tm {
+    set loc [lindex $measurement 0]
+    set temp [lindex $measurement 1]
+    puts "temperature at $loc is $temp"
+    set sum [expr {$sum + $temp}]
+}
+puts "average temperature is [expr {$sum / [llength $tm]}]"
+```
+
+.F[:
+Most Tcl developers consider `foreach` more elegant and better readable,
+compared to this:
+```
+   # processing a list with `for`:
+set sum 0.0; set count [llength $tm]
+for {set i 0} {$i < $count} {incr i} {
+    set loc [lindex $tm $i 0]
+    set temp [lindex $tm $i 1]
+    set sum [expr {$sum + $temp}]
+}
+puts "average temperature is [expr {$sum / $count}]"
+```
+]
+   
+---
+template: plain
+header: #### Loops with `foreach` – Parallel List Traversal
+
+[`foreach`]: https://www.tcl.tk/man/tcl/TclCmd/foreach.htm
+
+A different form of [`foreach`] can be useful in a similar example, with
+locations and temperatures coming from different lists._[]
+```
+set sum 0.0
+set count 0
+foreach loc $locations temp $temperatures {
+    puts "temperature at $loc is $temp"
+    set sum [expr {$sum + $temp}]
+    incr count
+}
+puts "average temperature is [expr {$sum / $count}]"
+```
+
+.N[
+The longer of both lists determines the number of runs through the loop. After
+the shorter list is exhausted, its placeholder variable is filled with an empty
+string inside the loop body.
+]
+
+.F[:
+Though this data model seems inferior because the association of the different
+lists via an index only might be less robust, i.e. will more easily be broken.
+]
+
+---
+template: plain
+header: #### Loops with `foreach` and Arrays
+
+[`foreach`]: https://www.tcl.tk/man/tcl/TclCmd/foreach.htm
+[`array`]: https://www.tcl.tk/man/tcl/TclCmd/foreach.htm
+
+Loops with [`foreach`] may be useful for [Tcl Arrays](#tcl_arrays_101) too, as
+some [`array`] sub-commands return [Tcl Lists](#tcl_lists_101).
+
+The following example assumes temperature measurements stored in an array `tm`,
+indexed by location:._[]
+```
+foreach location [array names tm] {
+    puts "temperature at $location is $tm($location)
+}
+```
+
+Or with yet an alternate loop form:
+```
+foreach {temperature location} [array get tm] {
+    puts "temperature at $location is $temperature
+}
+```
+
+.F[:
+No code to calculate the average is provided here – it should be obvious how
+it would have to be added.
+]
+
+---
+template: plain
+name: cmd_break_continue
+header: #### Early Termination / Reevaluation
+
+[`break`]: https://www.tcl.tk/man/tcl/TclCmd/break.htm
+[`continue`]: https://www.tcl.tk/man/tcl/TclCmd/continue.htm
+
+By using `break` loops need not run until a condition becomes `false` (or a list
+is exhausted), but can be prematurely terminated.
+
+By using `continue` the loop body needs not run to its end but can branch back
+to reevaluate the condition (or extract the next list element, if any).
+
+The following example calculates `N` primes:._[]
+```
+set primes [list 2 3]
+for {set next [lindex $primes end]} {[llength $primes] < $N} {} {
+    incr next 2
+    set found 1
+    foreach p $primes {
+        if {$next % $p} continue
+        set found 0
+        break
+    }
+    if {$found} {
+        lappend primes $next
+    }
+}
+```
+
+.F[:
+Obviously a list of primal numbers is left in `primes` ehen after the loop terminates.
+]
+
+---
+template: plain
+name: subroutines
+header: ### Subroutines
+
+[`proc`]: https://www.tcl.tk/man/tcl/TclCmd/proc.htm
+
+Tcl subroutines are
+
+* defined with the command [`proc`]
+* taking the subroutine's name as first argument
+* followed by a formal argument list, and
+* the subroutine body.
+
+The table associating names with the code to call is then extended by one more
+entry, branching to the subroutine body once the subroutine's name is recognised
+as command to execute, after syntax analysis is complete.
+
+.N[
+Formal arguments are the most complex parts (relatively) and will receive more
+coverage soon.
+]
+
+---
+template: plain
+name: global_variables
+header: #### Communicating through Global Variables
+
+[`global`]: https://www.tcl.tk/man/tcl/TclCmd/global.htm
+
+Packaging the [prime number calculation](#cmd_break_continue) into as subroutine
+requires little effort, if the communication takes place through global
+variables:
+```
+proc calculate_primes {} {
+    global N primes
+    … ;# as before
+}
+…
+puts -nonewline "how many primes? "; flush stdout; gets stdin N
+calculate_primes
+puts "first $N primes: $primes"
+```
+
+.N[
+Instead of naming the global variables in the command [`global`], all references
+such variables may be preceded with two colons (`::`).
+]
+
+---
+template: plain
+header: #### Communicating through Argument- and Return-Values
+
+An improvement over globals, which is easy to achieve, is the use of
+
+* a value argument for handing over the number of primes to calculate, and
+* the return value for transferring back the result.
+
+That way none of the variables inside `calculate_primes` is visible to the
+caller and no variable belonging to the latter is reachable by the callee.
+
+Packaging the [prime number calculation](#cmd_break_continue) into as subroutine
+requires little effort, if the communication takes place through global
+variables:
+```
+proc calculate_primes {N} {
+    … ;# as before
+    return $primes
+}
+…
+puts -nonewline "how many primes? "; flush stdout; gets stdin cnt
+puts "first $cnt primes: [calculate_primes $cnt]"
+```
+
+---
+template: plain
+header: #### Communicating through Reference Arguments
+
+[`upvar`]: https://www.tcl.tk/man/tcl/TclCmd/upvar.htm
+
+For results yet another communication style is useful: reference arguments.
+
+This requires
+
+* on the *caller's side* to hand over a variable **name**, and
+* on the *callee's side* to link that name via the command [`upvar`] with a
+  local alias, effectively "reaching out" of the subroutine to the variable
+  named by caller.
+
+Accordingly modified the subroutine and its cal will now look as follows:
+```
+proc calculate_primes {N vname} {
+    upvar $vname primes
+    … ;# as before
+    return [llength $primes]
+}
+…
+puts -nonewline "how many primes? "; flush stdout; gets stdin cnt
+calculate_primes $cnt result
+puts "first $cnt primes: $result
+```
+
+---
+template: plain
+header: #### Arguments with Default Values
+
+The following example once more expects its first arguments to be passed by
+reference (again applying `upvar` in cookbook-style), but also demonstrates
+a default value in case of its second argument.
+
+In short, `fincr` extends what `incr` does to floating point variables:
+```
+proc fincr {vname {inc 1}} {
+    upvar $vname v
+    set v [expr {$v + $inc}]
+    return $v
+}
+```
+
+Some possible ways to use (and test) `fincr` are:
+```
+set x 1.5
+…
+incr x           ;# increments variable 'x' to 2.5
+incr x -0.5      ;# decrements variable 'x' to 2.0
+puts [fincr x 0] ;# prints 2.0 on console (variable 'x' unchanged)
+```
+
+---
+template: plain
+header: #### Variable Length Argument Lists
+
+Variable length arguments lists have already been used … in the helper function
+used a number of times to show the resulting command line after Tcl has finished
+its syntax analysis.
+
+The essential mechanism is
+
+* to specify name `args` as last in the formal parameter in the definition of a
+  subroutine,
+* what will cause to receive all arguments as a list – or those remaining after
+  some fixed arguments, which must be always specified by the caller (see below).
+
+The following example combines `puts` and `format` within a single function that
+behaves like `printf` in C, hence the name:
+```
+proc printf {fmt args} {
+    eval puts -nonewline {[format $fmt\n} $args {]}
+}
+```
+
+.N[
+Make sure to understand why the implementation needs to use `eval` internally
+and also why the quoting is necessary.
+]
+
+---
+template: plain
+name: cmd_uplevel
+header: #### Details on `upvar` and `uplevel`
+
+[`uplevel`]: https://www.tcl.tk/man/tcl/TclCmd/uplevel.htm
+
+Most Tcl users apply `upvar` rather in "cookbook-style", like it was shown in
+the last example … and that is usually sufficient.._[]
+
+Some Tcl users also know that there is a related command [`uplevel`],
+
+* much similar to `eval` in that it takes a string, applies Tcl syntax
+  analysis and executes the resulting command,
+* but arranges to make this happen **as if the caller** of the subroutine
+  had executed that command.
+
+The real use for this is is to implement (new) ways of structuring control flow
+(which Tcl users rarely do), and some *block of code* has to be executed as if
+the caller had run it locally.
+
+.N[
+Do not worry if you have no idea what this page is about, once the time comes
+you need it, you will be experienced enough to understand it.
+]
+
+.F[:
+As a rough sketch what goes on behind the scenes: each subroutine call has a
+*stack frame* where locals are stored. Arguments are locals in most ways sense,
+e.g. modifications are only applied locally and storage is space reclaimed once
+a subroutine ends. Arguments are special in one single aspect: the caller sets
+their initial value. The command `upvar` issued in a function does not exactly
+create a local variable but arranges that using a local name will actually
+access a variable in the *caller's* stack frame.
+]
+
+---
+template: plain
+name: error_handling
+header: ### Error Handling
+
+If a subroutine cannot perform its advertised function, e.g. there may be bad
+argument values, it needs to indicate this to the caller.
+
+Many programming languages provide a way to signal certain kinds of failure
+in special ways, so does Tcl with
+
+* the command `error` that branches back …
+* … possibly forcing a number of nested function calls to terminate …
+* to the next `catch` command, if any.
+
+---
+template: plain
+header: #### Example: Using `error`
+
+[`error`]: https://www.tcl.tk/man/tcl/TclCmd/error.htm
+
+Using the command [`error`] is as simple as to call it after some failed test,
+with an argument describing the problem.
+
+Again the subroutine to calculate primes is used to demonstrate this:._[]
+```
+proc calculate_primes {N} {
+   # check if N is numeric
+   if {![string is integer $N]} {
+       error "argument is not a number: $N"
+   }
+   … ;# as before
+}
+```
+
+.N[
+Without further precautionary measures, calling `calculate_primes` with any
+non-numeric argument will now abort all further processing.
+]
+
+When the Tcl-Shell is used interactively, the above message will be produced
+and the user is returned to the command level.
+
+.F[:
+The [command `string`](#char_strings used above to test whether `N` contains
+digits only will be covered in [Part 3](#tcl_standard_library).
+]
+
+---
+template: plain
+header: #### Example: Using `catch`
+
+[`catch`]: https://www.tcl.tk/man/tcl/TclCmd/catch.htm
+
+The command [`catch`] may be used to regain control after the command `error`
+has been executed.
+
+The following example demonstrates how a program could be prompted repeatedly
+for interactive input, until the call to `calculate_primes` succeeds:
+```
+for {set done 0} {!$done} {} {
+    puts -nonewline "how many primes? "; flush stdout;
+    gets stdin cnt
+    if {[catch {calculate_primes $cnt} result]} {
+        puts "cannot calculate primes: $result"
+    } else {
+        puts "first $cnt primes: $result"
+        set done 1
+    }
+}
+
+```
+
+.N[
+Another typical use pattern involving `catch` will be shown in
+[Part 3](#tcl_standard_library), when the handling of
+[errors on opening a file](#handling_open_errors) is demonstrated.
+]
+
+---
+template: plain
+name: reusable_parts
+header: ### Organising Reuse
+
+[`source`]: https://www.tcl.tk/man/tcl/TclCmd/upvar.htm
+
+As soon as there are some 50 or 100 lines of Tcl code has been written, there
+may some reusable components emerge from it.
+
+Basically there are three ways of organising reuse – assuming *"Copy & Paste"*
+of reusable components in the editor shall be avoided:
+
+* Write subroutine definitions in a file of their own, and
+* read this file explicitly with the command [`source`].
+
+<!-- -->
+
+* Organise the files with reusable subroutine definitions in a way,
+* so that [Tcl's Autoloading] will find and read it, whenever necessary.
+
+<!-- -->
+
+* Organise your library components into [Tcl Packages].
+
+.N[
+All of the above can be subsumed under "advanced use" and in so far is no
+required knowledge to start using Tcl.._[]
+]
+
+[Tcl's Autoloading]: https://www.tcl.tk/man/tcl/TclCmd/library.htm
+[Tcl Packages]: https://www.tcl.tk/man/tcl/TclCmd/package.htm
+
+.F[
+What may be useful to know for Vivado users is that **on startup** some files
+– presumably defining reusable subroutines – are looked up and read, if they
+exist. Such a file must be named `init.tcl` and be placed in either a
+sub-directory of the installation directory or of the user's home directory.
+(See [UG835] for details.)
+]
+
+[UG835]: http://www.xilinx.com/support/documentation/sw_manuals/xilinx2014_4/ug835-vivado-tcl-commands.pdf
+
+---
+template: plain
+name: tcl_standard_library
+header: ### Part 3: The Tcl Standard Library
+
+------------------------------------------------------------------------------
+
+* [Syntax versus Library._[]			](#syntax_vs_library)
+* [Handling Character Strings			](#char_strings)
+* [Formatting and Scanning			](#format_and_scan)
+* [Using Regular Expressions			](#regular_expressions)
+* [Date and Time				](#date_and_time)
+* [Working with Files				](#file_handling)
+* [Command Line and Environment Variable	](cmd_line_and_env)
+* [Running External Programs			](#cdm_exec)
+* [Introspection (and Debugging)		](#introspection)
+
+------------------------------------------------------------------------------
+
+**Note:** The above will also get coverage through practical "live" examples
+during the presentation. You are welcome to control with your questions and
+proposals for variations which parts will get increased attention which are
+only addressed cursory.
+
+.F[:
+This summarizes a few important points of [Part 1](#tcl_vivado_basics) and
+[Part 2](#tcl_programming_language) in an extremely condensed form, for all who
+choose not to attend to these, maybe because there is already some prior
+experience with Tcl programming.
+]
+
+
+---
+template: plain
+name: syntax_vs_library
+header: ### Syntax versus Library
+
+As [Tcl's syntax is only minimal](#tcl_minimal_syntax), more of the learning
+effort needs to be invested on the side of the its standard library, but:
+
+* This can be "lazily" and "incrementally":  
+
+  * Only the commands that need to be used need to be learned, and
+  * as such are used promptly, experience builds up quickly.
+
+* There are many systematic patterns,
+
+  * so it is usually easy to "extrapolate" from existing experience,
+  * though there are also irregularities … occasionally.._[]
+
+.F[:
+Most of these are due to backward compatibility and were rather due to,
+trade-offs, not breaking with the bulk of existing code. E.g. following
+the pattern emerging from later practice, all the commands handling lists
+should have rather been subcommands of a command `list`, but as it stands
+that command creates lists (only) and other purposes are served with other
+commands, all starting with an `l` (lower case letter ell).
+]
+
+---
+template: plain
+name: interactive_learning
+header: #### Learning Interactively
+
+Nearly everything command in Tcl can be tried interactively
+
+* and often as "one-liner" (i.e. without framing it into a larger program)
+* so in one go with reading the manual any obscurities may be clarified.
+
+.N[
+A similar approach is used for demonstrating some important library functions
+during this part of the presentation.
+]
+
+Please feel free to interrupt the speaker, to control the direction into which
+the live examples given evolve.
+
+Let's start with looking up which standard commands are available:
+.pull-left[
+```
+info commands
+```
+Gives the whole list, but …
+
+… hmm, looks a bit unreadable, all these long lines without visual breaks …
+]
+.pull-right[
+… better: with line breaks …
+```
+join [info commands] \n
+```
+… even better: sorted!
+```
+join [lsort [info commands]] \n
+```
+]
+
+---
+template: plain
+name: char_strings
+header: ### Handling Character Strings	
+
+[`string`]: https://www.tcl.tk/man/tcl/TclCmd/string.htm
+
+The command [`string`] has a lot of subcommands. Some of the more frequently
+used ones are:
+
+* `string length` … – return number of characters._[]
+* `string index` … *`pos`* – return single character at *`pos`*
+* `string range` … *`from to`* – return sub-string *`from`* … *`to`*  
+   (**inclusive** range specification, so C++ STL users pay attention!)
+* `string repeat` … *`count`* – return *`count`* concatenations
+* `string first` *`what`* … – return position where *`what`* first matches
+* `string last` *`what`* … – return position where *`what`* last matches
+* `string is` *`class`* … – return if characters in strings are of *`class`*
+* `string compare` … … – **attention** three-way compare (== 0 is equal)
+* `string equal` … … – compare exactly for equality (!= 0 is equal)
+* `string match` *`pattern`* … – compare with *`pattern`*   
+   (according to file name pattern matching rules)
+
+Many more are useful, like `toupper`, `tolower`, `trim`, `trimleft` `trimright`,
+…
+
+.F[:
+Be aware of character set issues – with this and all other string handling
+commands. As Tcl internally uses 16 bit characters, Unicode with its whole
+[Basic Multilingual Plane (BMP)] will work flawlessly, but surrogate pairs
+may not, and – depending on the purpose for which the string is used –
+also combining characters might need special attention.
+]
+
+[Basic Multilingual Plane (BMP)]: http://en.wikipedia.org/wiki/Plane_%28Unicode%29#Basic_Multilingual_Plane
+
+---
+template: plain
+name: regular_expressions
+header: ### Formatting and Scanning
+
+[`format`]: https://www.tcl.tk/man/tcl/TclCmd/format.htm
+[`scan`]: https://www.tcl.tk/man/tcl/TclCmd/scan.htm
+
+The commands [`format`] and [`scan`] provide capabilities close to what
+`sprintf` and `sscanf` offer in C/C++.._[]
+
+.N[
+The commands in Tcl work with strings of dynamic length.
+]
+
+C and C++ developers therefore
+
+* may simply apply their existing knowledge …
+
+* … using Tcl syntax,
+
+* but without any worries about buffer overflows.
+
+.F[:
+Which is basically the same for strings as in C `fprintf` and `fscanf` provide
+for files, or `printf` and `scanf` for standard output and standar input.
+]
+
+---
+template: plain
+name: tcl_format_example
+header: #### Formatting Example
+
+Most often `format` is used if some output should be arranged in columns, like
+in the following table of Sine, Cosine, and Tangent functions:
+```
+set PI [expr {2*acos(0.0)}]
+for {set angle 0} {$angle <= 360} {incr angle 15} {
+    set line [format "%3d" $angle]
+    set radians [expr {$PI*$angle/180.0}]
+    foreach func [list sin cos tan] {
+        set result [expr ${func}($radians)]
+        if {abs($result) > 1e7} {
+            set result "~inf"
+        } else {
+            set result [format "%.3f" $result]
+        }
+        append line [format " %11s" $result]
+    }
+    puts $line
+}
+```
+
+---
+template: plain
+name: tcl_scan_example
+header: #### Scanning Example
+
+Often `scan` is a useful helper to convert numeric strings into their value.._[]
+
+The following reads two floating point numbers and prints the diagonal, if both
+were sides of a rectangle:
+```
+while {[gets stdin line] > 0} {
+    set line [string trim $line]\n
+    if {[scan $line "%f%f%\[\n]" x y dummy] != 3} {
+        puts "not two float values: $line"
+        continue
+    }
+    puts [format "diagonal of rectangle with sides a=%g and b=%g\
+                  is c=%g" $x $y [expr {sqrt($x*$x + $y*$y)}]]      
+}
+```
+
+Note that the example takes special care to recognize excess input after the
+second float, which would be silently accepted that way:
+```
+    if {[scan $line "%f%f" x y] != 2} …
+```
+
+.F[:
+Despite the fact that this usually works automatically, there are occasions
+where more control is desirable, especially if "bad input" should be sorted
+out early.
+]
+
+---
+template: plain
+name: byte_value_example
+header: #### Reading and Writing Byte Values
+
+Programming with Tcl close to the hardware sometimes requires to do numerical
+operation on byte values.
+
+Here `scan` and `format` are useful too, as converting with the `%c`-specifier
+will translate between character values and (internal) integral numbers.
+
+For some input stream – channel $uart below, assumed to be in **translation
+mode `binary`(!)** – the following reads single bytes._[], then
+
+* considers the upper [Nibble] as sequence number,
+* the lower as four associated bit values, and
+* assembles an array of sixteen elements,
+* with each value being a list of four `0`s or `1`s
+
+```
+format [read $uart 1] %c byte
+set index [expr {($byte >> 4) & 0x0F}]
+set result($byte) [list]
+for {set i 0} {$i < 4} {incr i} {
+    lappend result($byte) [expr {($byte >> i) & 0x1}]
+}
+```
+
+[Nibble]: http://en.wikipedia.org/wiki/Nibble
+
+.F[:
+The command `read` is covered in a [later section](#tcl_cmd_read).
+]
+
+---
+template: plain
+name: regular_expressions
+header: ### Using Regular Expressions
+
+Regular expressions offer elegant and powerful ways for processing character
+strings.
+
+[`regexp`]: https://www.tcl.tk/man/tcl/TclCmd/regexp.htm
+[`regsub`]: https://www.tcl.tk/man/tcl/TclCmd/regsub.htm
+
+The main usage areas are:
+
+* Very flexible string comparisons
+* Extracting parts of a string
+* Systematically modifying strings._[]
+
+The first two are handled with the command [`regexp`], the last with [`regsub`].
+
+.N[
+For most use cases it makes sense to enclose a regular expression in curly
+braces ([Tcl full quoting](#curlybrace_quoting)).
+]
+
+The above avoids that any contained character gets a special handling in the
+[Tcl Syntax Analysis](#syntax_quickly) and is eventually substituted by
+something else.
+
+.F[:
+In principle, as Tcl strings can have any content, regular expressions might
+also be used to manipulate binary data, though quoting must then be considered
+very carefully (inside and outside the regular expression) and specifying
+non-printable characters correctly comes with its own set of pitfalls, which
+even depends on the Tcl version used.
+]
+
+---
+template: plain
+name: regex_rules_quickly
+header: #### Regular Expressions - The Basics
+
+[`re_syntax`]: https://www.tcl.tk/man/tcl/TclCmd/re_syntax.htm
+
+Basically there are
+
+* **Atoms** – representing an inseparable unit, like
+
+  * a specific single character, or
+  * a character from a given selection,
+
+* **Operators** – binary (postfix) and unary (infix),
+
+* **Precedence Rules**, and
+
+* **Round Parentheses** to alter precedence.
+
+On the next slides follow a very brief (far from exhaustive) introduction to
+Tcl's Regular Expression Syntax and some basic usage examples.
+
+.N[
+For a detailed description of Tcl's regular expression syntax see the
+manual entry [`re_syntax`].
+]
+
+---
+template: plain
+name: regex_atoms
+header: ##### Regular Expression Atoms
+
+Most characters in regular expression are used literally, i.e. they stand
+as atoms for themselves. Notable exceptions are:
+
+* `.` (dot) – represents any character
+* `[…]` – represents any character listed inside (denoted here as …)
+* `[^…]` – represents any character **not** listed inside (denoted here as …)
+
+Furthermore a backslash allows to introduce the character following it as atom,
+and there are also escape sequences for non-printing characters.._[]
+
+* `\.` – represents a single dot;
+* `\[` and `\]` – represent opening and closing square brackets;
+* `\?`, `\*`, `\+`, and `\|` – represent question mark, asterisk, plus, and
+  vertical bar (which otherwise all are operators – see next page);
+* `\\` – represents a backslash.
+* `\a`, `\b`, `\f`, `\n`, `\r`, `\t`, `\v`, (and some more) – represent
+  non-printing characters (like in C/C++).
+
+.F[:
+Be sure to understand that when it comes to regular expressions, there are
+actually **two** machineries in Tcl at work, that could cause to substitute
+things like `\n` or `\t` etc. by something else.
+]
+
+---
+template: plain
+name: regex_charclasses
+header: ##### Regular Expression Character Classes
+
+A frequent necessity in a regular expression is to specify
+
+* any *digit* – `[0123456789]` or `[0-9]`,
+* any *hex digit* – `[0-9a-fA-F]`, or
+* any *alphanumeric character* `[0-9a-zA-Z]`,
+* … (etc.) …
+
+.W[
+A range in square brackets, like `a-z`,  means: *Any [Code Point] in the
+underlying character set, from `a` to `z` inclusive.*._[]
+]
+
+<!-- -->
+
+.pull-left[
+As a solution a way to specify [Character Classes] is provided …
+
+* `[:digit:]` – decimal digits
+* `[:xdigit:]` – hex digits
+* `[:alpha:]` – letters
+* `[:space:]` – white space
+* … (etc.) …
+
+]
+.pull-right[
+… including [Shorthand Escapes]:
+
+* `\d` – (decimal) digits
+* `\s` - white space
+* … (etc., also inverted) …
+* `\D` – anything **but** digits
+* `\S` - anything **but** white space
+* … (etc.) …
+
+]
+
+[Code Point]: http://en.wikipedia.org/wiki/Code_point 
+[Character Classes]: https://www.tcl.tk/man/tcl/TclCmd/re_syntax.htm#M31
+[Shorthand Escapes]: https://www.tcl.tk/man/tcl/TclCmd/re_syntax.htm#M65
+
+.F[:
+And therefore some examples above (especially a range like `[a-z]`) might not
+describe what is intended, which might also be the case with character classes
+with respect to localization.
+]
+
+---
+template: plain
+name: regex_operators
+header: ##### Regular Expression Operators
+
+Regular expression operators are listed below in order of decreasing precedence
+(left box higher, right box lower, inside boxes top to down):
+
+.pull-left[
+.N[
+Postfix operators control repetition of atoms (or sub-expression) on their
+left side:
+
+* **`?`** means 0…1 (optional)
+* **`*`** means 0…∞ (any length)
+* **`+`** means 1…∞ (at least one)
+* **`{`*`m`*`,`*`n`*`}`** means *m*…*n*
+* **`{`*`m`*`}`** means *m* exactly
+* **`{`*`m`*`,}`** means *m* at least
+
+]
+]
+.pull-right[
+.N[
+Infix operators connect atoms (or sub-expressions) on their left and right side:
+
+* **Adjacency**:._[]   
+  *first* left *then* right hand side must occur.
+* **Separation by `|`** (bar):  
+  *either* left *or* right hand side must occur.
+
+]
+]
+
+.center[+]
+
+.N.center[
+Parentheses may be used to modify precedence.
+]
+
+.F[:
+Two adjacent sub-expressions may be read as joined with an "invisible operator"
+in between, i.e. `ab` as if it were `a·b`, with `·` has a precedence lower than
+all postfix operators and higher than the vertical bar.
+]
+
+---
+template: plain
+name: regex_examples_simple
+header: #### Regular Expression Simple Examples
+
+Following are some simple examples for regular expressions.._[]
+
+| Regular Expression …       | … and to what it matches                |
+|:---------------------------|:----------------------------------------|
+| <[:alpha:]*>               | sequence of letters in angle brackets   |
+| <.*>                       | … as before, not limited to letters     |
+| <[^<>]*>                   | … as before, excluding angle brackets   |
+| `\d+`                      | non-empty digit-sequence (somewhere)    |
+| `^\d+$`                    | … as before, but nothing else around it |
+| `-?\d+`                    | integral number with an optional sign   |
+| `[-+]?\d+`                 | … as before but allowing `+` **or** `-` |
+| `\d+\.?\d*`                | signed integral or floating point number|
+| `\d+(\.\d*)?`              | … as before, in a slightly different way|
+| `\d+(\.\d*)?(e[-+]?\d+)?`  | … as before, with optional exponent     |
+
+
+.F[:
+For subset of examples checking whether some string holds an integral or a
+floating number, note that this can be also achieved with [`string is integer`]
+or [`string is double`], and in the latter case is much more complete with
+respect to what is recognised as valid float.
+]
+
+[`string is integer`]: https://www.tcl.tk/man/tcl/TclCmd/string.htm#M21
+[`string is double`]: https://www.tcl.tk/man/tcl/TclCmd/string.htm#M17
+
+---
+template: plain
+name: regex_examples_advanced
+header: #### Regular Expression Advanced Examples
+
+As an advanced example consider a regular expression describing the currency
+formatting as usual in Germany:
+```
+set CURRENCY_FORMAT {^\d{1,3}([.]\d{3})*,\d{2}$}
+# from the start-----^||||||| |||||||| ||||||||
+# one to three digits-^^^^^^^ |||||||| ||||||||
+# more groups of three digits-^^^^^^^^ ||||||||
+# repeated any number of times --------^|||||||
+# followed by comma and two more digits-^^^^^^|
+# and up to the end nothing after it----------^
+```
+
+As some easy variations consider an optional decimal part (1) or a mandatory
+decimal part that may be replaced by a dash (2):
+```
+set CURRENCY_FORMAT {^\d{1,3}([.]\d{3})*(,\d{2}$)?} ;# 1
+set CURRENCY_FORMAT {^\d{1,3}([.]\d{3})*,(\d{2}|-)} ;# 2
+```
+
+---
+template: plain
+name: regex_example_switch
+header: #### Using Regular Expressions with `switch`
+
+[`switch`]: https://www.tcl.tk/man/tcl/TclCmd/switch.htm
+
+Regular expressions can also be used for comparisons with [`switch`]. The following
+assumes `value` may allow for various number formats (from binary to hexadecimal).._[]
+.pull-left[
+Parsing according to C/C++ …
+```
+switch -regex -- $value {
+{^0[1-7][0-7]*$} {
+    … ;# octal
+}
+{^-?[0-9]+$} {
+    … ;# (signed) decimal
+}
+{^0[xX][0-9a-fA-F]+$} {
+    … ;# hexadecimal
+}
+{^0b[01]+$} {
+    … ;# binary (since C++14)
+}
+```
+]
+.pull-right[
+… or more like VHDL …
+```
+switch -regex -- $value {
+{^X"[:xdigit:]+"$}
+    … ;# binary (since C++14)
+}
+{^"[01]+"$}
+    … ;# binary (since C++14)
+}
+```
+
+… (Verilog-ers will get their example on the next page ☺).
+]
+
+.F[:
+The character classes specified as range also assume a machine character set
+with sequentially adjacent code points for `0` to `9` – which is guaranteed by
+the C/C++ ISO standard – and `a` to `f` and `A` to `F` – which holds for original (7-bit) ASCII,
+Extended (8-bit) ASCII, all ISO 8859 variants, EBCDIC and Unicode.
+]
+
+---
+template: plain
+name: regex_examples_parsing
+header: #### Parsing with Regular Expressions
+
+A regular expression also provides an easy way to access substrings that matched
+some part of it. 
+
+The following (more or less) recognizes binary literals._[] from [Verilog]:
+```
+if {[regexp {(\d+)?([sS])?'[bB]([10zZ?]+)} $value\
+              match size signed bits]} {
+    … ;# matching parts in
+    … ;# - match : all (what matched)
+    … ;# - size  : integral value or empty
+    … ;# - signed: may be 's', 'S', or empty
+    … ;# - bits  : non-empty sequence of '0', '1', 'z', 'Z', or '?'
+} else {
+    … ;# did not match (variables not set)
+}
+```
+
+.F[:
+A more involved example which allows for other bases is given, but without further
+explanations:
+
+```
+   # first come the parts for the various number bases, they will then be connected via '|'
+set based_values [list {[bB][01zZ?_]+} {[oO][0-7zZ?_]+} {[dD][0-9_]+} {[xX][0-9a-fA-FzZ?_]}]
+if {[regexp "(\\d+)?(\[sS])?'([join $based_values |])" $value match size signed base_val]} {
+    set base [string index $base_val 0]
+    set val [string range $base_val 1 end]
+    …
+}
+```
+]
+
+[Verilog]: http://en.wikipedia.org/wiki/Verilog
+
+---
+template: plain
+name: date_and_time
+header: ### Date and Time
+
+[`clock`]: https://www.tcl.tk/man/tcl/TclCmd/clock.htm
+
+The command [`clock`] has a large number of subcommands, providing many
+operations with date and time.
+
+* `clock seconds` – returns current time point._[]
+* `clock milliseconds` – as before, counting in 10<sup>-3</sup> seconds
+* `clock microseconds` – as before, counting in 10<sup>-6</sup> seconds
+* `clock format` … – converts *to* calendar and wall-clock time point
+* `clock scan` … – convert *from* calendar and wall-clock time point
+* … (and more) …
+
+.W[
+Finer grained clock counts (*msec*, *µsec*) do neither guarantee accuracy nor
+resolution to that value, and also might jitter.
+]
+
+A platform depended [High Resolution Timer] is usually available via
+
+* `clock clicks` – may overflow sooner or later, so use only for relative
+  timings of short periods.
+
+[High Resolution Timer]: https://www.tcl.tk/man/tcl/TclCmd/clock.htm#M23
+
+.F[:
+In the U*ix tradition this is based on January s<sup>st</sup> 1970 GMT and – as
+long as integers were stored in 32 bit (signed), could count from (aproximately)
+the year 1902 to the year 2038.
+]
+
+---
+template: plain
+name: file_handling
+header: ### Working with Files
+
+Working with files basically falls into three main categories:
+
+* [Working with Directories](#directory_handling)
+
+* [Operations with Files in Whole](#files_in_whole)
+
+* [Accessing the Content of Files](#accessing_files)
+
+---
+template: plain
+name: directory_handling
+header: #### Working with Directories
+
+[`pwd`]: https://www.tcl.tk/man/tcl/TclCmd/clock.htm#M23
+[`cd`]: https://www.tcl.tk/man/tcl/TclCmd/clock.htm#M23
+[`glob`]: https://www.tcl.tk/man/tcl/TclCmd/clock.htm#M23
+
+The commands dealing with directories and directory content are:
+
+* [`pwd`] – return the absolute path name of the current working directory;._[]
+
+* [`cd`] – change the current working directory according to the path name
+  specified as argument or to the user's home directory, if no argument is
+  given;
+
+* [`glob`] – return list of path names in given or current directory (see
+  examples following).
+
+.W[
+As it is a **per-process** resource, be careful when changing the current
+working directory: it determines how relative file path names are interpreted
+for **all** parts of the running program.
+]
+
+.F[:
+This is implemented as built-in command with the same name as the command a
+traditional U*ix system provided for that purpose. Therefore `pwd` in Tcl not
+only works at the interactive interpreter level (where any unknown command is
+tried as operating system command anyway).
+]
+
+---
+template: plain
+name: directory_handling
+header: ##### Example for `pwd` and `cd`
+
+The commands `pwd` and `cd` may be used in concert to remember and restore
+the current working directory.
+
+The base technique is:
+```
+set old [pwd] ;# save current working directory
+cd …          ;# change to other directory
+…
+…             ;# (work in other directory)
+…
+cd $old       ;# restore old working directory
+```
+.N.center[
+Note that the above is not very secure against failures.
+]
+
+Especially it will create problems if one of the command running while the
+directory is changed causes an error which is caught without restoring the
+working directory, the change will unexpectedly persist.._[]
+
+.F[:
+The wrapping required to make saving and restoring secure against intermediate
+failure is not hard to write but also not trivial, so it is not shown here. If
+the feature to run a portion of a Tcl program with a different working directory
+is required more often, it will probably be best to implement a new control
+structure for that purpose with the help of [`uplevel`](#cmd_uplevel).
+]
+
+---
+template: plain
+name: directory_handling
+header: ##### Example for `glob`
+
+The basic use of `glob` is trivial and easy, as it returns a list of path names
+for the current or a given directory.
+
+.pull-left[
+All files matching `*`:
+```
+… [glob *] … 
+```
+]
+.pull-right[
+All files in directory `/tmp`:
+```
+… [glob /tmp/*] …
+```
+]
+
+There are many useful options, some are shown in the examples below:._[]
+```
+… [glob -hidden *] …   ;# include hidden file
+… [glob .* *] …        ;# as before on Unix or Linux
+… [glob -- -*]         ;# files with names starting with '-'
+… [glob -types d *]    ;# only (sub-) directories
+```
+
+.N[
+Another important option is `-nocomplain`: when it is **not** specified an
+empty result (list) will be considered as error.
+]
+
+.F[:
+With respect to the example on "hidden" files it probably need to be understood
+that for U*ix traditionally these are all files that have a name beginning with
+dot.
+]
+
+---
+template: plain
+name: files_in_whole
+header: #### Operations with Files in Whole
+
+[`file`]: https://www.tcl.tk/man/tcl/TclCmd/file.htm
+
+The command [`file`] has a large number of sub-commands for all the operations
+that are possible with a file in whole:
+
+* `file exists …` – (should be obvious)
+* `file stat …` – query file properties in single operation._[]
+* `file copy …` – copy content of a file
+* `file rename …` – rename a file
+* `file delete …` – remove a file
+* `file mkdir …` - create (sub-) directory
+* `file separator` – return file name separator (i.e. `/` or `\`)
+* `file join …` – combine path name components to file name
+* `file split …` – split file name into path name components
+* `file extension …` – file name suffix
+* `file rootname …` – all but file name suffix
+* `file tail …` – last file name component
+* `file dirname …` – all but last file name component
+* … (and more) …
+
+.F[:
+There are also sub-commands to query properties individually, like
+`file size …`, `file mtime` …, etc. and some of these may also be used for
+setting that property.
+]
+
+---
+template: plain
+name: accessing_files
+header: #### Accessing the Content of Files
+
+Accessing the content of files from Tcl is modelled after C:
+
+* `open` returns a file handle which usually is saved in a variable,
+
+* as it is the entrance ticket for other operations with the file,
+
+  * like reading or writing (`read`, `gets` and `puts`),
+  * finding or setting the current position (`tell` and `seek`), and
+  * miscellaneous operations like testing for EOF (`eof`)
+
+* and finally handed over to `close` to release the resources associated with
+  the file handle.
+
+---
+template: plain
+header: ##### Opening Files
+
+[`open`]: https://www.tcl.tk/man/tcl/TclCmd/open.htm
+
+The command [`open`] has two arguments:
+
+* the file name and
+* the open mode.
+
+As usual, if the file name is a relative path name it is interpreted from the
+current working directory.
+
+.N[
+An unusual feature is that a path name beginning with a vertical ar (`|`) is
+considered to be external command. Depending on the open mode its input or
+output is then available via the file handle returned.._[]
+]
+
+Open modes are specified
+
+* either as for `fopen` in C (`r`, `w`, `rw`, `a`, …)
+* or in Posix style (`RDONLY`, `WRONLY`, `RWDR`, `APPEND`, …)
+
+
+Note that there are also some options effecting serial ports, but usually these
+are configure by [`fconfigure`](#cmd_fconfigure), which has still more options.
+
+.F[:
+This can be seen as a way of starting a process asynchronously and will be
+covered later
+]
+
+---
+template: plain
+name: handling_open_errors
+header: ##### Handling Errors when Opening Files
+
+Errors on opening files with `open` are usually caught (to be adequately
+handled) in an idiomatic style.
+
+The following example opens a file specified by variable `pathname` for reading:
+```
+if {[catch { open $pathname r } result]} {
+    … ;# handle error (reason is in result)
+} else {
+    … ;# work with file (handle is in result)
+    close $result ;# <--- essential to avoid resource leaks
+}
+```
+
+.N[
+Note that closing a file – even if opened read-only – is usually necessary to
+avoid resource leaks.._[]
+]
+
+
+.F[:
+The problem may not show if only some few files are left in an opened state. But
+if a fragment like the above is run over and over again and does **not** close
+the file it opened, at some point the process max reach its limit of open
+files, and from that on **all** attempts to open a file will cause an error
+On operating systems as used in the 1980s, this limit was about 20 or 50;
+recent OS may have raised to to several hundred, but on most any OS there still
+is such a limit.
+]
+
+---
+template: plain
+name: get_file_lines
+header: ##### Deferred Handling of Errors when Opening Files
+
+If an error from `open` cannot be sensibly handled **locally**, it is often
+easier to leave error handling to the caller of a function.
+
+Return content of text file as Tcl list, each line one element:._[]
+```
+proc get_file_lines {name} {
+    set handle [open $name r]
+    set content [read -nonewline $handle]
+    close $handle
+    return [split $content \n]
+}
+…
+if {[catch { get_file_lines $pathname } file_lines]} {
+    … ;# problem opening (or reading?) the file
+}
+…
+```
+
+.W[
+If the above will not fail on `open` but might fail on `read` there will be a
+resource leak, as the opened file will not be closed.
+]
+
+.F[:
+A counterpart subroutine [`put_file_lines`](#put_file_lines) is shown later.
+]
+
+---
+template: plain
+header: ##### Intermezzo: What Exactly Does `catch`?
+
+[`catch`]: https://www.tcl.tk/man/tcl/TclCmd/catch.htm
+[`error`]: https://www.tcl.tk/man/tcl/TclCmd/error.htm
+
+The last example may serve as reminder of an some unusual aspect in the use of
+the command [`catch`], that regains control after an [`error`]:
+
+* The **return value** of `catch` holds the information, whether the
+  command sequence given as *first* argument
+
+  * lead to an error – then `catch` returns "true" as condition for `if`;
+  * everything went ok – then `catch` returns "false" (and the `else` part
+    of an `if` stament would get control).
+
+* Depending on the former, the **second argument** of `catch` will 
+
+  * *either* hold the message returned from `error`,
+  * *or* the result of the command executed last.
+
+Not that `catch` as argument to `if` may be used with or without quoting:._[]
+.pull-left[
+The usual style …
+```
+if {[catch { … } …]} …
+```
+]
+.pull-right[
+… and for the lazy natures:
+```
+if [catch { … } …] …
+```
+]
+
+.F[:
+Why is that so? (Find out with or
+[good ol' helper used to demonstrate quoting](#defining_subroutines).)
+]
+
+---
+template: plain
+name: cmd_fconfigure
+header: ##### Special File Handling Options
+
+[`fconfigure`]: https://www.tcl.tk/man/tcl/TclCmd/fconfigure.htm
+[`fileevent`]: https://www.tcl.tk/man/tcl/TclCmd/fileevent.htm
+
+The command [`fconfigure`] provides various sub-commands to control many
+aspects of files.
+
+The following list is by no means exhaustive:
+
+* how buffering is handled (none, by line, larger block, …),
+* translation modes (e.g. newline → carriage return + newline or vice versa),
+* if a `read` will block as long as no data is available,._[]
+
+.W[
+Using the non-blocking modes for reading might lead to a design
+with busy waiting and/or sub-optimal latency times.
+]
+
+Asynchronous designs with read operations in call-backs (registered with the
+command [`fileevent`]) are usually superior to non-blocking read mode (though
+not easily doable in Vivado, but also not typically required there).
+
+.F[:
+This is mainly used for "device files" representing to a serial line interface,
+TCP/IP-sockets, or U*ix pipelines. In some cases it may also make sense for
+console input.
+]
+
+---
+template: plain
+name: cmd_fconfigure
+header: ##### Configuring Serial Devices
+
+The command `fconfigure` also provides sub-commands to control the operation of
+serial hardware interfaces.
+
+Again, the following is by no means exhaustive:
+
+* set baud rate, bit-frame, parity …
+* … behaviour of control lines …
+* … flow control …
+
+.N[
+In the standard Tcl manual pages the details are not documented with
+`fconfigure` but in section [Serial Communications] of `open`.
+]
+
+[Serial Communications]: https://www.tcl.tk/man/tcl/TclCmd/open.htm#M22
+
+---
+template: plain
+name: tcl_cmd_read
+header: ##### Reading Whole Files or Fixed Size Portions
+
+[`read`]: https://www.tcl.tk/man/tcl/TclCmd/read.htm
+
+The command [`read`] either reads a number of given characters from a file, or
+a [whole file](#get_file_lines).
+
+The following fragment reads single characters with waiting (assuming a valid
+file-handle `fh`):
+```
+proc readchar {channel _b} {
+    upvar $_b b
+    set b [read $channel 1] ;# <-- will until data is available
+    return [expr {![eof $channel]}]
+}
+…
+while {[readchar $fh byte]} {
+    … ;# process byte
+}
+```
+
+.W[
+Only translation mode `binary` (set on `open` or with `fconfigure`) ensures
+single physical bytes are extracted.._[]
+]
+
+.F[:
+Depending on the encoding otherwise multiple code units (i.e. physical
+multibyte sequences) may be extracted to determine the code point of the
+character read.
+]
+
+---
+template: plain
+header: ##### Reading Characters Without Waiting
+
+[`after`]: https://www.tcl.tk/man/tcl/TclCmd/after.htm
+
+As already mentioned, a file handle may be configure not to wait for data being
+available on read:
+```
+…
+fconfigure $fh -blocking 0
+while {![eof $fh]} 
+    set ch [read $fh 1] ;# <-- will not block if no data, so ...
+    if {[string length ch] == 0} { ;# ... we need to check ...
+        … ;# ... and can do something useful here (REALLY useful)
+    } else {
+        … ;# process ch
+    }
+}
+```
+
+.W[
+Really useful means exactly that: **REALLY USEFUL**. Simply doing nothing when
+no data is available will lead to busy waiting and eats-up precious CPU time
+while waiting.._[]
+]
+
+.F[:
+The very least were to sleep a small amount of time without causing CPU load.
+This can be achieved with the command [`after`], followed by a numeric argument
+that specifies the time to sleep in milliseconds, but this always requires
+trade-off between lowering the CPU load and sub-optimal latency.
+]
+
+---
+template: plain
+header: ##### Reading Line By Line
+
+[`gets`]: https://www.tcl.tk/man/tcl/TclCmd/gets.htm
+
+The command [`gets`] reads single lines from a file.
+
+In detail its behaviour depends on the arguments used in the call:
+
+* With **only** a file-handle as argument it returns the next line read,
+
+* With a file-handle **and** a variable name as argument it
+  * returns the number of characters read, and
+  * leaves the line content in the named variable.
+
+Depending on the translation mode configured for the file end-of-line
+conventions will be handled transparently.
+
+.N[
+In the line read (and in the count returned by the second form) there is no
+end-of-line character contained.
+]
+
+---
+template: plain
+header: ##### Examples Reading Line By Line
+
+The following two examples append each line read from a file as new element to a
+list (assuming a valid file-handle `fh`):
+.pull-left[
+```
+set result [list]
+while {[gets $fh line] >= 0} {
+    lappend result $line
+}
+```
+]
+.pull-right[
+```
+set result [list]
+while {![eof $fh]} {
+    lappend result [gets $fh]
+}
+```
+]
+
+Though both ways may look equivalent, they do actually are different for files
+in which the last line is terminated with end-of-line characters (as is usually
+the case).
+
+.pull-left[
+.N[
+The loop is exited after the last line (as it is probably intended).
+]
+]
+.pull-right[
+.N[
+The loop is **not** exited after the last line, as reading it has not (yet)
+set the end-of-file state – this will only happen with the **next** call to
+`gets`.._[]
+]
+]
+
+.F[:
+But that call then returns an empty string, hence the `result` list has another
+(empty) entry at its end.
+]
+
+---
+template: plain
+header: ##### Writing to Files
+
+[`puts`]: https://www.tcl.tk/man/tcl/TclCmd/puts.htm
+
+The command [`puts`] has been used often in this presentation, but always
+with only one argument (and sometimes the option `-nonewline` too).
+
+If used with two arguments, the first must be a file handle, typically obtained
+from a call to open.
+
+The following is the counterpart to the example subroutine
+[`get_file_lines`](#get_file_lines):._[]
+```
+proc put_file_lines {name content} {
+    set handle [open $name w]
+    puts -nonewline $handle [join $content \n]
+    close $handle
+}
+```
+
+.F[:
+Why does the call to `puts` require the use of the `-nonewline` option?
+]
+
+---
+template: plain
+header: ##### More Operations with Open Files
+
+[`eof`]: https://www.tcl.tk/man/tcl/TclCmd/eof.htm
+[`seek`]: https://www.tcl.tk/man/tcl/TclCmd/seek.htm
+[`tell`]: https://www.tcl.tk/man/tcl/TclCmd/tell.htm
+
+The commands [`eof`], [`seek`], [`tell`], support more operations with
+files (via file handles typically obtained from `open`).
+
+.N[
+The speaker will show live examples if this topic is of special interest.
+]
+
+---
+template: plain
+header: ##### Flushing and (finally) Closing Files
+
+[`flush`]: https://www.tcl.tk/man/tcl/TclCmd/close.htm
+[`close`]: https://www.tcl.tk/man/tcl/TclCmd/close.htm
+
+The command [`close`] is required to release any resources connected to a file
+handle.
+
+.N[
+When a file is `close`-d, also the last buffered output is flushed.
+]
+
+Hence closing a file open for writing may return an error!
+
+* Note that [`flush`]-ing the buffer only happens from the perspective of the
+  Tcl application.
+
+* On modern operating systems and also in the hardware of the storage system
+  there are usually additional levels of buffering.
+
+.W[
+Data may not have arrived on a reliable persistent storage media, only because
+the file to which is written has been `flush`-ed or `close`-d via its file
+handle.
+]
+
+---
+template: plain
+name: cmd_line_and_env
+header: ### Command Line / Environment Variables
+
+[Tcl Global Variables]: https://www.tcl.tk/man/tcl/TclCmd/tclvars.htm
+
+The calling context of a script may be accessed via [Tcl Global Variables].._[]
+
+* `argv` are the command line arguments (without the name of the command itself)
+  as list;
+* `argc` is the same as `llength $argv`;
+* `argv0` holds the path name of the script executed (not the interpreter,
+  i.e. **not** `tclsh` or `wish`);
+* `env` is an array holding the environment variables (as can usually expected
+  plus what has been individually set via `export` in the shell).
+
+.N[
+By using global variables with to leading semicolons, e.g. `::env` instead of
+`env`, the above also works as part of a subroutine, without introducing the
+variable name via the command [`global`](#global_variables).
+]
+
+.F[:
+There are global variables for many more purposes, like checking for the
+version of Tcl (`tcl_version`) or Tk (`tk_version`), platform specific
+properties like the file path name separator (`/` on U*ix and `\` on Windows) or
+byte order etc., and much, much more.
+]
+
+---
+template: plain
+header: ##### Example for Accessing Command Line Arguments
+
+[`exit`]: https://www.tcl.tk/man/tcl/TclCmd/exit.htm
+
+The following prints a message on standard error stream that includes the
+program name and terminates the Tcl interpreter with a given return status:
+```
+proc die {message {exitstatus 127}} {
+    global argv0
+    puts stderr "$::argv0 \[FATAL]: $message"
+    exit $exitstatus
+}
+```
+
+.W[
+A call to `exit` will usually terminate a Tcl script at any point, hence
+**resources not cleaned up automatically** at the end of the process may
+leak …
+]
+
+… but an application may chose to redefine the command `exit` and do something
+different.._[]
+
+.F[:
+Especially applications that may run arbitrary, user supplied Tcl scripts – like
+Vivado – will typically chose to ignore `exit` or at least do all necessary
+cleanup and may also save any data important for to be available for recovery
+on a restart.
+]
+
+---
+template: plain
+header: ##### Example for Accessing Environment Variables
+
+The following lists all the environment variables an their value in sort order:
+```
+foreach v [lsort [array names ::env]] {
+    puts "$v=$::env($v)
+}
+```
+
+Or only those with a `XILINX_`-prefix:
+```
+foreach v [lsort [array names ::env XILINX_*]] {
+    puts "$v=$::env($v)
+}
+```
+
+After modifying or adding to the global array `env`, the result is visible as
+(new) environment for a child processes, easily demonstrated as follows:
+```
+set env(MINE) whatever
+exec env | grep MINE
+```
+
+---
+template: plain
+name: cmd_exec
+header: ### Running External Programs
+
+[`exec`]: https://www.tcl.tk/man/tcl/TclCmd/exec.htm
+[`fileevent`]: https://www.tcl.tk/man/tcl/TclCmd/fileevent.htm
+
+The command [`exec`] is the general interface to run separate processes.
+
+Via a mix of Tcl and (U*ix) Shell syntax it provides many variations as
+exemplified below (including a meaningful mix thereof):
+
+* [run the process synchronously](#external_programs);
+* [run the process asynchronously](#external_demon_programs);
+* run several processes pipelined;
+* return standard output after completion …
+* … optionally including standard error output
+* … and/or turn abnormal termination into a Tcl error;
+* connect to the Tcl interpreter via file handles or sockets.._[]
+
+Besides its main purpose to open classic files, also the command `open` provides
+easy ways to run a separate process while either
+
+* [supplying its standard input](#external_program_input) or
+* [receiving its standard output](#external_program_output).
+
+.F[:
+This makes more sense for asynchronously run processes and will often
+necessitate to receive data sent *from* the external program *to* the
+interpreter in callbacks registered via [`fileevent`].
+]
+
+---
+template: plain
+name: external_programs
+header: #### Running Programs Synchronously
+
+The `exec` command may wait on the external program to end, i.e. run it
+synchronously.
+
+A typical fragment may look like this:
+```
+set xprog … ;# program to execute (with arguments)
+set result [exec $xprog] ;# execute and receive stdout and stderr
+```
+
+.N[
+The command `exec` may also be used to start a pipeline of more than one
+program.
+]
+
+---
+template: plain
+name: external_demon_programs
+header: #### Running Programs in Background
+
+The `exec` command may start the external program in the background, i.e. run
+it asynchronously (aka. as demon).
+
+A typical fragment may look like this:
+```
+set xprog … ;# program to execute (with arguments)
+exec $xprog & ;# execute (ignoring the result)
+```
+
+.N[
+The above is used if it does not matter when and how the background
+process ended.
+]
+
+The return value of an `exec` command like above, which is the [PID] of the
+process, may also be saved for later use:
+```
+set pid [exec $xprog &]
+```
+
+If the command `exec` is used to start a pipeline of more than one program in
+the background, the return value is a list of all process ids.
+
+[PID]: http://en.wikipedia.org/wiki/Process_identifier
+
+---
+template: plain
+name: external_demon_programs
+header: #### Controlling Programs in Background
+
+A saved PID will typically be used to control the program running in the
+background in some way, most often to … 
+
+.pull-left[
+… test whether it is still running …
+```
+if {[catch {
+       exec kill -0 $pid
+   }]} {
+    … ;# process terminated
+} else {
+    … ;# process still running
+}
+```
+]
+.pull-right[
+… or to forcefully terminate it.
+```
+# first ask politely ...
+exec kill -TERM $pid
+# ... then wait ...
+after 5000
+# ... and no more mercy now:
+exec kill -KILL $pif
+```
+]
+
+Linux and many other modern U*ix systems allow for finer grained interventions
+via the `/proc` file system.._[]
+
+.F[:
+At any time the entries within it represent a live snapshot of all currently
+running processes as PID-named sub-directories. Their entries turn allow to
+obtain information on and get control over these processes. For details see:
+https://www.kernel.org/doc/Documentation/filesystems/proc.txt
+]
+
+---
+template: plain
+name: external_program_input
+header: #### Sending Input to a Program
+
+[`open`]: https://www.tcl.tk/man/tcl/TclCmd/open.htm
+
+The [`open`] command may also be used to start a program as an external process
+while asynchronously supplying its standard input via a file handle.
+
+A typical fragment may look like this:
+```
+set xprog … ;# program to execute (with arguments)
+set handle [open |$xprog w]
+while { … produce more data for xprog to process … } {
+    puts $handle … ;# whatever
+}
+close $handle ;# will wait for xprog to terminate
+```
+
+---
+template: plain
+name: external_program_output
+header: #### Receiving Output from a Program
+
+[`open`]: https://www.tcl.tk/man/tcl/TclCmd/open.htm
+
+The [`open`] command may also be used to start a program as an external process
+while asynchronously reading its standard output via the file handle returned.
+
+A typical fragment may look like one of the following two fragments …
+.pull-left[
+… either lines of text …
+```
+set xprog … 
+set fh [open |$xprog r]
+while {[gets $fh line] >= 0} { 
+    … ;# process another line
+}
+close $fh
+```
+]
+.pull-right[
+… or arbitrary (binary) data.
+```
+set xprog … 
+fconfigure\
+    [set fh [open |$xprog r]]\
+    -translation binary
+set data [read $fh]
+close $fh
+… ;# process all binary data
+```
+]
+
+---
+template: plain
+name: introspection
+header: ### Introspection (and Debugging)
+
+The main interfaces required for introspection and debugging are available via
+the Tcl commands
+
+* [`info`](#cmd_info),
+
+* [`trace`](#cmd_trace), and
+
+* [`rename`](#cmd_rename)
+
+---
+template: plain
+name: cmd_info
+header: #### Obtaining Information (on Most Everything)
+
+[`info`]: https://www.tcl.tk/man/tcl/TclCmd/info.htm
+
+By various sub-commands the command [`info`] provides information many
+internals of the Tcl interpreter.
+
+The following is an overview only and by no means exhaustive:
+
+* `info vars` – returns a list of all variables (by default of the current
+   scope, but as an optional pattern may follow, by using `info vars ::*` all
+   global variables may be obtained too);
+* `info exists` *`varname`* – returns true if a variable *`varname`* exists.
+* `info commands` – returns a list of all commands currently known to the
+  interpreter (includes but is usually much more than the next);
+* `info procs` – returns a list of all currently known Tcl subroutines
+* `info args` *`procname`* – returns a list of arguments (including defaults)
+   as expected from subroutine *`procname`*;
+* `info body` *`procname`* – returns the body (implementation) of subroutine
+  *`procname`*;
+* `info functions` – returns a list of all mathematical functions currently
+   supported by `expr`.._[]
+
+.F[:
+It is easily possible to extend the support for mathematical functions, for
+details see section [Math Functions] in the manual page of `expr`.
+]
+
+[Math Functions]: https://www.tcl.tk/man/tcl/TclCmd/expr.htm#M22
+
+---
+template: plain
+name: cmd_trace
+header: #### Tracing Variable Access and Subroutine Execution
+
+[`trace`]: https://www.tcl.tk/man/tcl/TclCmd/trace.htm
+
+The various sub-commands of the command [`trace`] provide options to get
+call-backs when
+
+* variables are accessed (read, written, or unset), or
+
+* subroutines executed (entry, exit, or line-by-line trace).
+
+.N[
+The speaker will show live examples if this topic is of special interest.
+]
+
+---
+template: plain
+name: cmd_rename
+header: #### Renaming and Removing Commands
+
+[`rename`]: https://www.tcl.tk/man/tcl/TclCmd/rename.htm
+
+The command [`rename`] allows to
+
+* change the name of an existing subroutine, or
+
+* completely remove it, by renaming it to the empty string (`""` or `{}`).
+
+.N[
+The speaker will show live examples if this topic is of special interest.
+]
+
+---
+template: plain
+name: tcl_in_vivado_and_beyond
+header: ### Part 4: Using Tcl in Vivado and Beyond
+
+
+------------------------------------------------------------------------
+.pull-left[
+
+[**Tcl in Vivado**		](#tcl_vivado_summary)
+
+* [Understanding Design Objects	](#design_objects)
+* [Quoting Correctly Applied	](#correct_quoting)
+* [Special Square-Bracket Rules	](#special_sq_brackets)
+* [Design Object Name Matching	](#matching_object_names)
+* [More Uses of Tcl 		](#more_uses_of_tcl)
+* [Problematic Areas		](#problematic_areas)
+
+]
+
+.pull-right[
+
+[**Tcl beyond Vivado**		](#tcl_beyond_vivado)
+
+* [Calling C/C++-Modules	](#c_cpp_modules)
+* [TCP/IP-Communication		](#tcp_ip_networking)
+* [GUI-Programming		](#tk_gui_programming)
+* [(and more - if time allows)	](#you_name_it)
+
+]
+
+<!-- -->
+
+------------------------------------------------------------------------
+
+The (relative) weight of the major sections is controlled by attendees and may
+vary between "50:50" or "80:20", with the 80% on either side.
+
+.N[
+There will be a short poll now so that time can be appropriately allotted.
+]
+
+---
+template: plain
+name: tcl_vivado_summary
+header: ### Tcl in Vivado (Summarising)
+
+Tcl is integrated in Vivado as its Tool Command Language.
+
+In general Vivado's Tcl interpreter is full-featured._[] but in some few
+special-purpose areas it has restrictions.
+
+During start-up Vivado looks at various standard places to find and eventually
+read and execute (= `source`) files with Tcl commands.
+
+* These files are a good place for a collection of private subroutines needed
+  frequently in a Tcl-based design flow.
+
+* If the collection grows, consider to split it into logical groups, put each
+  group into a file of its own and `source` these from inside the files Vivado
+  which is automatically reads at start-up.
+
+* If your subroutine library grows even more, consider to make use of
+  [Autoloading](#reusable_parts).
+
+.F[:
+Currently the `tcl_version` used in Vivado is 8.5, i.e. just one minor release
+step from the current mainstream version of Tcl, which is 8.6.
+]
+
+---
+template: plain
+name: design_objects
+header: ### Understanding Design Objects
+
+At its core Vivado holds a Design Model in a set of interconnected Objects._[]
+
+These objects are grouped into classes with a set of properties, which can be
+queried and modified in various ways with commands added to Tcl by Vivado for
+that purpose.
+
+.center[
+**Design Objects are a new type from the viewpoint of Tcl.**
+]
+
+This type is the Vivado specific addition to Tcl's (internal) standard types
+like integral and floating numbers or character strings.
+
+.N[
+References to design objects are handled transparently by Tcl and need no special
+consideration when held in a Tcl variable or list.
+]
+
+.F[:
+This is mainly derived from the documentation and should be rather taken as
+conceptual description, not as internal details of the actual implementation.
+]
+
+---
+template: plain
+name: design_objects_in_lists
+header: #### Design Objects in Lists
+
+There are many commands in Vivado that return design objects, often as list of
+design objects.._[]
+
+A design object (reference) can be
+
+* added *to* a list *from* a variable or another list in which was held, and
+* taken *from* a list in which it is held and assigned *to* variable.
+
+Handing around a design object reference that way will keep the object itself
+fully intact, with all its properties.
+
+.N[
+The only thing that is made sure is that lists of design object (references)
+always hold objects of the same class.
+]
+
+.F[:
+This is called an "object container" in the Vivado documentation and actually
+a new Tcl type too. But most of the commands a Tcl developer expects to use for
+lists are available for object containers and hence it can be said they have
+the "look & feel" of a Tcl list.
+]
+
+---
+template: plain
+name: converting_design_objects
+header: #### Converting to and from Design Objects
+
+If on occasion a Tcl (built-in) command actually needs a character string, the
+design objects
+
+* will **not** be completely encoded into pure text form._[] (somehow),
+* instead **only** the `NAME` property of the design object will be used.
+
+.N[
+Vice versa the conversion *from* a name *to* a design object (reference)
+requires the use of a one of Vivado's `get_` commands.
+]
+
+Of course, design objects may be transformed into a textual description by means
+of `report_property -all …`, though the output then is primarily targeted to a
+human reader, not for direct further processing.
+
+.F[:
+This is what makes design objects different from the built-in types: the latter
+are always serializable to a pure text form, hence may be stored externally and
+retrieved with their original content. For design objects that would make little
+sense due to the many interconnections they may have with other objects, which
+in turn would then have to be serialised, or the originally serialises object
+were not of much use anymore.
+]
+
+---
+template: plain
+name: correct_quoting
+header: ### Quoting Correctly Applied
+
+In VHDL identifiers may be contain and surrounded with back-slashes, e.g.:
+
+* `\abc\def uvw\xyz\`
+
+This, of course, needs some quoting in Tcl, but full quoting
+
+* `{\abc\def uvw\xyz\}`
+
+will fail in that particular case, due to the trailing back-slash.._[]
+
+.N[
+Therefore the recommended solution is this:
+
+* **`"\\abc\\def uvw\\xyz\\"`**
+
+.N[
+**Use double quotes and write all contained back-slashes twice.**
+]
+
+.F[
+Though the trailing backslash will not be touched, the closing square bracket
+is not recognized as it is now exempt from brace counting.
+]
+
+---
+template: plain
+name: special_sq_brackets
+header: ### Special Square-Bracket Rules
+
+Via the `unknown` procedure the Tcl syntax analysis determines what should
+happen in case of unknown command.
+
+This allows a nifty trick in Vivado, to allow the use of VHDL signal vectors
+in their typical forms like `[1:16]`, [5], or `[*]` without quoting the square
+brackets:
+
+* The syntax analysis does nothing special here, it simply identifies the
+  command to be executed as being spelled `1:16`, `5`, or `*`.
+
+* If the `unknown` procedure detects that there is no built-in command with such
+  a name, it simply returns it (as a string) `[1:16]`, `[5]`, or `[*]`.._[]
+
+.N.center[
+Problem Solved!
+]
+
+.F[:
+Though, really, really interesting and "unexpected" things may happen in a
+Vivado design flow based on Tcl if you have the boldness to defined a procedure
+with a funny name that happens to look like a signal vector you use, e.g.:
+`proc 1:16 {} { return {[16:1]} }
+]
+
+---
+template: plain
+name: matching_object_names
+header: ### Matching Design Objects Names
+
+When design objects are returned as lists from the various `get_`-commands, it
+is often the case that their elements are selected via match-patterns for their
+names.
+
+There are two matching styles:
+
+* The default is pattern matching as with Tcl's command
+  [`string match`](https://www.tcl.tk/man/tcl/TclCmd/string.htm#M35)
+  is used on the individual parts of an object's hierarchical name.
+
+* If requested via the `-regex` option comparisons will be based on Tcl's
+  [regular expressions](#https://www.tcl.tk/man/tcl/TclCmd/re_syntax.htm).
+
+The former is further controlled by the `-hierarchical` option together with
+`current_instance`, and is often more convenient. The latter is much more
+powerful but careful attention must be paid to correct quoting.
+
+---
+template: plain
+name: glob_matching_object_names
+header: #### Default (Glob-Style) Matching of Design Objects Names
+
+This is further controlled by
+
+* the `current_instance` setting and
+* the `-hierarchical` option.
+
+The model is similar to navigating in a hierarchical file system, but not as
+close as it may seem at first glance:
+
+* The (Vivado) commando `current_instance` is somewhat similar to setting the
+  working directory in that it sets the *working instance*.
+
+* Glob-style patterns **not** containing the hierarchical separator `/` (i.e.
+  a slash, just as in Unix file systems) search from that instance.
+
+* Glob-style patterns containing the hierarchical separator will search deeper
+  down from the current instance.
+
+.N[
+Note that there is no way to refer to the top-level directly when the current
+instance is set elsewhere (i.e. like using absolute path names in file systems).
+]
+
+---
+template: plain
+name: glob_matching_object_names
+header: #### Recursive (Glob-Style) Matching
+
+With the `-hierarchical` option the search pattern must **not** contain the
+hierarchical separator and is applied in a recursive search down from the
+current instance to each element of the composed name.
+
+The Vivado documentation ([UG835, pg. 16](#vivado_tcl_documentation)) explains
+the `-hierarchical` option …
+```
+set pattern … ;# pattern to match names
+current_instance "" ;# set scope to top-level
+set result [get_cells -hierarchical $pattern]
+```
+… with the manual approach that had to be used alternatively:._[]
+```
+set result {}
+foreach hcell [list "" A B A/a1 A/a2 B/b1 B/b2] {
+    current_instance $hcell ;# move scope to $hcell
+    set result [concat $result [get_cells $pattern]]
+    current_instance ;# return scope to design top-level
+}
+```
+
+.F[:
+`A B A/a1 A/a2 B/b1 B/b2` is the whole set of cell names used in their miniature
+example, and `""` needs to be added so that the top-level itself is included.
+]
+
+---
+template: plain
+name: regex_matching_object_names
+header: ####  Regular Expressions Matching of Design Objects Names
+
+This kind of matching is much more powerful but careful attention must be paid
+to correct quoting.
+
+.W[
+*Trial and Error* with regular expressions in combination with quoting will more
+often lead to frustration than to success.._[]
+]
+
+This does not mean you should avoid it – it rather means you should feel
+familiar with both, regular expressions and quoting, when using both in
+concert.
+
+.N[
+The speaker will show live examples if this topic is of special interest.
+]
+
+.F[:
+This is especially true if (part of) the selection pattern comes from a
+variable. Though the Tcl syntax can be generally considered as very "regular"
+and hence easy to grasp (as there are few rules only that apply strictly with
+little or no exceptions) be sure to develop a good understanding for its
+intricacies.
+]
+
+---
+template: plain
+name: more_uses_of_tcl
+header: ### More Uses of Tcl in Vivado
+
+Actually the Tcl language is used in some specialised areas of Vivado too.
+
+* Custom Design Rule Checks (DRC):
+
+  * In this some boiler-plate code is necessary.
+  * For the general recipe to be followed see the Vivado documentation
+    ([UG894, pg. 28](#vivado_tcl_documentation)).
+
+* Design Constraints (XDC)
+
+  * While many Vivado specific commands is available …
+  * … substantial built-in Tcl commands are deliberately blocked.._[]
+  * For details see the Vivado documentation
+    ([UG903, Appendix A](#vivado_tcl_documentation)),
+
+.N[
+The restrictions to Tcl commands only apply if constraints are specified in
+`*.xdc` files. In `*.tcl` files all the usual Tcl built-ins are available.
+]
+
+.F[:
+The reason for not supporting the full set of Tcl built-in commands is that
+Vivado provides a way to interactively modify constraints specified in `*.xdc`
+files.
+]
+
+---
+template: plain
+name: problematic_areas
+header: ### Problematic Areas
+
+All commands that register call-backs are often pointless (though these commands
+are available)
+
+* as there is no event loop running by default, and
+* if one is started explicitly, it would block the return to GUI mode.
+
+What *will* work is to establish a TCP/IP-socket connection between the Tcl
+interpreter running on behalf of Vivado and some external program.
+
+.N[
+An external program connected to the Tcl interpreter inside Vivado via TCP/IP
+**may or may not** itself be written in Tcl.
+]
+
+Nevertheless, by giving up event-driven style at least on the side of Vivado,
+some communication options are lost!
+
+For one-way communication also a classic pipeline may be used and is easily 
+established for [reading](#external_program_output) or
+[writing](#external_program_input) via the command `open`.
+
+.F[:
+Though it might even be possible to arrive at an integrated solution if
+sufficient work is invested, also with respect to future Vivado versions that
+may change the internal working, it seems wise to separate event-driven
+architectures from each other.
+]
+
+---
+template: plain
+name: tcl_beyond_vivado
+header: ### Tcl beyond Vivado
+
+Using Tcl beyond Vivado can have several faces:
+
+* Extend Vivado with Tcl (and possibly Tk) in areas which are not properly
+  prepared for it.._[]
+
+* Use Tcl for local scripting purposes, from small to medium to large to mission
+  critical applications, possibly touching the core competences of a software
+  development department or a whole company (has been done … successfully).
+
+* Use Tcl combined with Tk to provide Graphical User Interfaces.
+
+.F[:
+This is not meant as criticism with respect to Vivado, it only means that there
+are use possible case not foreseen, especially when the necessity arises to merge
+event loops.
+]
+
+---
+template: plain
+name: c_cpp_modules
+header: ### Calling C/C++-Modules
+
+Extending Tcl with modules written in C offers big chances for rapid
+prototyping,
+
+* doing the first sketches in a Tcl-only implementation,
+
+  * either as "proof of concept", or
+  * to determine what actually is required
+
+* then identifying the parts that need substantial performance improvements,
+  and
+
+* finally rewriting these in C or C++.
+
+.N[
+This should work with Vivado too,._[] but the author has not yet tried it.
+]
+
+.F[:
+Of course, this makes sense only if Tcl is used heavily to script the Vivado
+work flow and there are – and provably – parts which substantially profit from
+a re-implementation in C or C++.
+]
+
+---
+template: plain
+name: tcp_ip_networking
+header: ### TCP/IP-Communication
+
+TCP/IP-Communication usually has two sides:._[]
+
+* The *Server Side* which usually needs some concurrency – or at least a
+  "user experience" that "feels" like, as can be achieved in a event driven
+  design with compact and efficient call-backs.
+
+* The *Client Side* which may or may not need concurrency.
+
+As with Vivado the event driven programming model – though thoroughly supported
+by Tcl – is difficult to exploit, Vivado can only be extended with Tcl to work
+as a simple form of TCP/IP-client.
+
+A possible idea what that could be was sketched in Part 1.
+
+.N[
+The speaker will show live examples if the remaining time allows and this topic
+is of special interest.
+]
+
+.F[:
+Though note, that the data stream as such is symmetrical, once a socket
+connection has been established.
+]
+
+---
+template: plain
+name: tk_gui_programming
+header: ### GUI-Programming
+
+GUI-Programming – contributed to Tcl via Tk._[] – is the major extension added
+to Tcl very early and partially as "Proof of Concept" to demonstrate the
+extensibility of Tcl.
+
+Here is your very first TK application:
+```
+#!/usr/bin/wish
+wm title . "Hello, World of Tk"
+pack [button .b\
+      -text "Do NOT klick here!\n(please)"\
+      -background red\
+      -foreground white\
+      -command exit
+]
+```
+
+.F[:
+Actually *Tk* is the abbreviation for *Toolkit* – so, strangely, a very general
+name was chosen for a Tcl extension with a very specific purpose.
+]
+
+---
+template: plain
+name: tk_gui_pros
+header: ### Tk Pro's
+
+* Easy to learn, once you know Tcl including is peculiarities.
+
+* Relatively "lightweight", i.e. small memory footprint compared to later GUI
+  libraries.
+
+* Excellent reputation for its portability across operating systems, its
+  robustness and long-term stability / backward compatibility.
+
+* Encourages to use layout management via strategies, not fixed placements.
+
+* Enough widgets for all basic tasks, including a (very powerful!) text area
+  and a (rather basic) canvas.
+
+---
+template: plain
+name: tk_gui_cons
+header: ### Tk Con's
+
+* If someone does not like Tcl for any reason, probably hard(er) to learn.
+
+* Not so may "nifty" widgets as more recent GUI libraries.
+
+* Some pre-manufactured standard-dialogues are no shining example for usability.
+
+* Can not cope with Qt (also for other reasons) … but does Tk strive to?
+
+.N[
+Despite of all the above, **Tk is very well suited** for adding a GUI to an
+embedded device with a touch screen, especially if the device software is based
+on Linux.
+]
+
+.F[:
+This becomes especially visible in the standard file selection dialogue Tk shows
+under Linux, which is, well, "in need to getting used to". Though, Linux also
+has so many different file managers that a "standard look & feel", how to
+present files from which a user can select, is hard to derive.
+]
+
+---
+template: plain
+name: you_name_it
+header: ### And More – If Time Allows
+
+So you name it …
+
+.center[
+
+… otherwise:
+
+.N[
+
+**
+*Thanks for Listening!*
+**
+
+]
+]
+
+---
+template: plain
+name: emb_tcl_code_walk
+header: ### Code-Walk through the `emb_tcl` Example
+
+To demonstrate the advanced options of Tcl/Tk there is an example in the
+[sub-directory `emb_tcl`](emb_tcl).
+
+It constists of five related examples, demonstrating the communication
+
+* between a (hypothetical) application running on a Linux-based embedded board,
+  and
+
+* a control application with a Tk-GUI running anywhere on a PC in the network.
+
+.N[
+The latter needs **not** run Linux, any system for which Tcl/Tk is available
+will do, i.e. MS-Windows, Apply Macs, etc. but of course most any Linux variant
+too.
+]
+
+---
+template: plain
+name: emb_tcl_emb1
+header: #### First Mini Server: [`emb1.tcl`](emb_tcl/emb1.tcl)
+
+A small **Tcl-only** program written mostly as a "Proof of Concept" how the
+content of a file._[] can be transferred back and forth between this program
+and a client ([`emb1_cl.tcl` – see next page](#emb_tcl_emb1_client)).
+
+* Excluding comments it has less than 90 lines of code.
+* Control clients can "come and go" at their will.
+* Any number of control clients may connect simultaneously …
+* … and are synchronised with each other.
+
+.W[
+The communication protocol is deliberately kept trivial and not designed to
+protect against malicious clients.
+]
+
+.F[:
+Many Embedded Linux Systems have device drivers exposing (parts of) their
+hardware via pseudo-files (like in the `/dev`-directory), so that any
+application which is able to open files is sufficient may use these.
+]
+
+---
+template: plain
+name: emb_tcl_emb1_client
+header: #### First Client Application: [`emb1_cl.tcl`](emb_tcl/emb1_cl.tcl)
+
+A Tcl program **with a Tk-based GUI** visualising as check-boxes the values
+of four `0` or `1` characters, as exchanged with the serving application
+([`emb1.tcl` – see previous page](#emb_tcl_emb1)).
+
+* Excluding comments it has less than 50 lines of code.
+* On start-up the current state is read from the serving application.
+* Changes of the state and of the checkboxes are immediately transmitted
+  (i.e. in both directions).
+
+.N[
+Any number of such clients may be started and stopped at any time, without
+affecting the serving application.
+]
+
+---
+template: plain
+name: emb_tcl_emb2
+header: #### Second Mini Server: [`emb2.tcl`](emb_tcl/emb2.tcl)
+
+A small **Tcl-only** program written mostly as a "Proof of Concept" how two
+pipelines,._[] a source and a sink, can be attached and their content transfered
+between this program and a client
+([`emb2_cl.tcl` – see next page](#emb_tcl_emb2_client)).
+
+* Excluding comments it has about 100 lines of code.
+* Control clients can "come and go" at their will.
+* Any number of control clients may connect simultaneously …
+* … and are synchronised with each other.
+
+.W[
+The communication protocol is deliberately kept trivial and not designed to
+protect against malicious clients.
+]
+
+.F[:
+It is a usual style for U*ix device drivers to modell sources that make data
+available "spontaneously" with blocking read operations, and sinks as pseudo
+files, not storing the written data but acting on it in some way.
+]
+
+---
+template: plain
+name: emb_tcl_emb2_client
+header: #### Second Client Application: [`emb2_cl.tcl`](emb_tcl/emb2_cl.tcl)
+
+A Tcl program **with a Tk-based GUI** visualising the data received from the
+the serving application ([`emb2.tcl` – see previous page](#emb_tcl_emb2)),
+while allowing to send data back with any move of the slider._[]
+
+* Excluding comments it has less than 50 lines of code.
+* On start-up the current state is read from the serving application.
+* Changes of the values read and of the slider position are immediately
+  transfered back and forth.
+
+.N[
+Any number of such clients may be started and stopped at any time, without
+affecting the serving application.
+]
+
+.F[:
+As the serving application suggests, the value displayed may be from an ADC and
+the slinder might control a DAC. (If you physically build that system you might
+even connect the output pin of the DAC with the input pin of the ADC via an
+RC-cirucuit and watch it slowly following the other.
+]
+
+---
+template: plain
+name: emb_tcl_debugging
+header: #### Debugging Support
+
+For tracing the demo application a number of message issued, categorized as
+`INFO`, `WARNING`, `ERROR` etc.
+
+.N[
+These are not only useful for debugging but also to get an initial understanding
+of the inner workings.
+]
+
+* The two serving applications make use of it by `source`-ing a Tcl-file …
+
+* … but keep silence if that file does not exist.
+
+For the more serious Tcl developers various Tcl debuggers are available, both
+freely and as part of commercial packages.
+
+.I[
+For a more information on the topic of debugging see:  
+http://wiki.tcl.tk/9715
+]
+
+---
+template: plain
+name: emb_tcl_dbg_tcl
+header: ##### Basic Debugging Support: [`dbg.tcl`]
+
+[`dbg.tcl`]: emb_tcl/dbg.tcl
+
+This is the basic form, simply printing the trace messages to *standard output*
+or *standard error*.
+
+* Excluding comments it has less than 25 lines of code.
+* To which channel messages are sent can be configured in a set-up section.
+* Messages from categories **not mentioned** in the set-up section will not be
+  printed.
+* Also it can be configured whether some kind of message will be considered
+  "fatal" and end the application.._[]
+
+.N[
+Simply inlcude the file `dbg.tcl` in an application and send trace or debug
+output with the command `dbg` followed by a category and the message.
+]
+
+.F[
+The default configuration will terminate the application on any message of the
+`FATAL` category and continue on every other.
+]
+
+---
+template: plain
+name: emb_tcl_rdbg_tcl
+header: ##### Remote Debugging Support: [`rdbg.tcl`]
+
+[`rdbg.tcl`]: emb_tcl/rdbg.tcl
+
+In this form trace messages are sent over a socket connection to a simple viewer
+with a Tk-based GUI.
+
+* Excluding comments it has less than 100 lines of code.
+* Whether messages are sent or silently discarded depends on whether the viewer
+  is running._[]
+* Message colours can be configured in its set-up section.
+
+.N[
+Includes the file `rdbg.tcl` in an application and start-up the remote viewer by
+running the same program via the symbolic link `rdbg-gui.tcl`.
+]
+
+.F[:
+Detecting the viewer is automatically, but is done with an adaptive algorithm,
+so that the application is not slowed down too much by frequent failed attempts
+to establish the connection.
+]
+
+---
+template: plain
+name: emb_tcl_xdbg_tcl
+header: ##### Extended Debugging Support: [`xdbg.tcl`]
+
+[`xdbg.tcl`]: emb_tcl/xdbg.tcl
+
+[`dict`]: https://www.tcl.tk/man/tcl/TclCmd/dict.htm
+
+This is an advanced viewer with an inspection feature, therefore crossing the
+border to a (primitive) debugger:
+
+* Excluding comments it has only a little more than 250 lines of code for the
+  GUI part …
+* … and another about 100 lines that qneed to be added to the application.
+* It provides various ways to select interactively which messages to view and to
+  hide.
+* The set-up allows very flexible configuration in [`dict`] (dictionary)
+  style.._[]
+
+.N[
+To start-up the remote viewer run `xdbg-gui.tcl`. Any application that includes
+the file `xdbg.tcl` will connect to it.
+]
+
+.F[:
+Dictionaries are among the more recent features of Tcl and still not used in
+many Tcl applications with a long tradition, like Vivado. Be sure to RTFM.
+]
+
+</textarea>
+<!-- :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+<!-- ::::::::::::::::::::: )-: ereh TNETNOCLAER fo dne :::::::::::::::::::: -->
+<!-- :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+    <script src="remark.min.js" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+      var slideshow = remark.create({ highlightLanguage: 'tcl', highlightStyle: 'docco' });
+    </script>
+  </body>
+</html>
