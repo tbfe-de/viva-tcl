@@ -9,18 +9,18 @@ in Stuttgart-Korntal, on July 18, 2015.
 
 It is published here under a Creative Commons "BY-SA" Copyright, which means:
 
+You may use it freely for any purpose as long as you don't claim it is yours.
+If you extend or otherwise improve it you should also share all modifications.
+
 ## Code
 
 The code was written to have an example to walk through at the end of the
 presentation - if time allows and participants express their interrest in it.
 
-You may use it freely for any purpose as long as you don't claim it is yours,
-and if you extend or otherwise improve it you need to should in turn share all
-your modifications.
+It is published under the MIT License, which means you may do with it whatever
+you want, YOU NEED NOT SHARE ANY MODIFICATIONS, only one thing:
 
-The example code is published under the MIT License, which means you may do with
-it whatever you want, YOU NEED NOT SHARE ANY MODIFICATIONS, only one thing:
-Don't hold me responsible if anything you learn or derive from that code fails.
+Don't hold me responsible if anything you learn or derive from the code fails.
 
 ## Future Directions
 
