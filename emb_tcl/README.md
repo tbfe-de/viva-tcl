@@ -1,0 +1,60 @@
+## Code-Walk
+
+This directory contains seven examples total, which are introduced in the presentation and explained in more detail now.
+
+### Overview
+
+Four of the examplkes are actually pairs of a "server" and a matching "client", all fully written in Tcl. They
+demonstrate how an Embedded Board (presumable running under Linux) might communicate an be controlde with respect
+to its state by a remote application, based on a TK-GUI.
+
+See later sections "Binary State – Polled" and "ADC / DAC – Streamed" fpr details.
+
+The other three examples deal with debug tracing in various comfortable way. Note that these are NOT meant to compete
+with (semi-) professional Tcl-IDEs and -debuggers, they just shall demonstrate how MUCH you can do with only a LITTLE
+bit of Tcl/Tk-Code.
+
+### Binary State – Polled
+
+Under Linux (though with its origin in "Plan 9", the Unix follow-up created in the eraly 90's at AT&T) it is state of
+the art to represent I/O-pins via a device driver as (pseudo-) file, which then can be read or written by any application
+that is able to operate on (text-) files.
+
+Beyond that little assumptions can be made, e.g. with respect to the data in the pseudo-file, it might be text or binary.
+Here it is assumed that the device driver is our friend, reflecting the current and receiveing a modified pin state as
+usual characters '0' and '1', i.e. ASCII 0x110000 and 0x110001. Thuis makes it content easier in most scripting
+languages, including Tcl, but only marginally: few lines would have to be added if the state were represented in
+separate bits of a word (8, 16, 32 bit, ...) or a sequence thereof.
+
+To try the examples without any device driver presenting real I/O-pins as pseudo-file, just create an ordinary text
+file:
+
+```
+echo "0000" >port_pins
+```
+
+in the directory which is the current directory when you run `emb1.tcl` (the "server") and `emb1_cl.tcl` (the client).
+
+Start the former first in the background
+```
+./emb1.tcl &
+```
+
+then the latter:
+
+```
+./emb1_cl.tcl
+```
+
+#### Note:
+
+To keep things easy some assumptions are hard-wired in the Tcl code, especially the path name to the interpreters
+(`tclsh` and `wish`), if such are different on your system, simply change the files accordingly or name the
+interpreter explicitly:
+```
+tclsh emb1.tcl & wish tcl1_cl.sh
+```
+
+If you want to go beyond a simple demo on a single PC, you will also need to adapt the IP addresses and maybe the port
+numbers used for the TCP/IP socket, but this should be obvious from a cursory look at the code, you need not be a
+Tcl expert to do this.
