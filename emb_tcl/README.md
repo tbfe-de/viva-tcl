@@ -9,7 +9,7 @@ Four of the examplkes are actually pairs of a "server" and a matching "client", 
 demonstrate how an Embedded Board (presumable running under Linux) might communicate an be controlde with respect
 to its state by a remote application, based on a TK-GUI.
 
-See later sections "Binary State – Polled" and "ADC / DAC – Streamed" fpr details.
+See later sections "Binary State – Polled" and "ADC / DAC – Streamed" for details.
 
 The other three examples deal with debug tracing in various comfortable way. Note that these are NOT meant to compete
 with (semi-) professional Tcl-IDEs and -debuggers, they just shall demonstrate how MUCH you can do with only a LITTLE
@@ -101,4 +101,36 @@ cat port_pins
 and if this gets boring, start some more `emb1_cl.tcl` clients and watch how changing the check-boxes in any of it
 will immediately display the state of the others.
 
+### ADC / DAC – Streamed
+
+These example demonstrates a slightly different approach ot communicate with the state of the embedded device based
+on pseudo files:
+
+* There is one file that "produces" values at random times – i.e. a data source, and
+* another file that "swallows" any values written to it – i.e. a data sink.
+
+Again, to keep things simple, the names of these files are hardwired to `dac_value` and `adc_value` but simple to
+change. (Last not least, the examples are rather meant as "proof of concept", but written clean enough to base a
+product solution on them, besides just drawing on the idea.)
+
+To try the demons without a real deivce driver representing a ADC or DAC via such pseudo-files, just create two
+named pipes:
+```
+mkfifo dac_value
+mkfifo adc_value
+```
+
+Then connect the first on with a `cat`-command that shows any value written to it and prepare to supply values for
+the second one via the keyboard:
+```
+cat -u dac_value &  # <--- note the & for background execution!
+cat -u adc_value    # <--- NO & as you want to supply values!
+```
+
+**Hint:**
+
+You may also do the above from different terminals (consoles). This would help to avoid to confuse what is input and
+what is output. But you are well able to do everything from a single terminal, though in this case it will probably
+pay to first get comfortable with  the job control features of your shell (i.e. `CTRL-Z`, `fg` and `bg` commands,
+and eventually `jobs` and `kill %n` too).
 
