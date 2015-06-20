@@ -31,7 +31,7 @@ To try the examples without any device driver presenting real I/O-pins as pseudo
 file:
 
 ```
-echo "0000" >port_pins
+echo 0000 >port_pins
 ```
 
 in the directory which is the current directory when you run `emb1.tcl` (the "server") and `emb1_cl.tcl` (the client).
@@ -60,7 +60,7 @@ If you want to go beyond a simple demo on a single PC, you will also need to ada
 numbers used for the TCP/IP socket, but this should be obvious from a cursory look at the code, you need not be a
 Tcl expert to do this.
 
-#### `emb.tcl`
+#### `emb1.tcl`
 
 Despite it is a really brief Tcl program, this "server" is able to **connect to any number of `emb1_cl.tcl` clients**
 and will care for
@@ -69,11 +69,36 @@ and will care for
 * from any client to the file `port_pins`, and (of course)
 * between the clients.
 
+So, what you may want to try now is change the file `port_pins` by
+
+```
+echo 0101 >port_pins
+echo 1111 >port_pins
+```
+
+and watch how the client(s) update.
+
 [Try this with a full-blown or just a mininal HTTP server on the embedded board, maybe JavaScript on the client, well
 and then throw in some PHP ... I'm (not really) curious how many lines of code you will need. Anyway you will need to
 acquire competence in a number different areas. Now compare this to the Tcl approach: you need to gather competence
 too, but only in Tcl, and you can profit from it as Vivado user! IMHO the second best approach (or best approach for
 "Non-Tclers") were to acquire competence with JavaScript and use node.js on the embedded side, but that's just my
 2 cent ...]
+
+#### `emb1_cl.tcl`
+
+This implements the client with a GUI but has even less lines of code as the server! If you are fluent in C++ and Qt
+you may be able to beat it, but again, if you need to learn Qt only to do THIS, better stick with Tk, it is extremely
+portable too, though – admitetdly – misses some of the nifty "modern" control elements and hence may appear
+old-fashioned ... at least in comparison it to the latest super-duper smart phone, advertised from the big sellers
+who want to draw the money from your pockets in intervals of 18 months ...)
+
+So, what you may want to try now is to click the check-boxes and watch how the file changes by doing a
+```
+cat port_pins
+```
+
+and if this gets boring, start some more `emb1_cl.tcl` clients and watch how changing the check-boxes in any of it
+will immediately display the state of the others.
 
 
