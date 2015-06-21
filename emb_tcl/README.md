@@ -16,6 +16,15 @@ The other three examples deal with [Debug-Tracing](#debug-tracing) in various wa
 to compete with (semi-) professional Tcl-IDEs and -debuggers, they just shall demonstrate how *MUCH* you can do with
 only a *LITTLE* bit of Tcl/Tk-Code.
 
+[`emb1.tcl`]:     emb1.tcl
+[`emb1_cl.tcl`]:  emb1_cl.tcl
+[`emb2.tcl`]:     emb2.tcl
+[`emb2_cl.tcl`]:  emb2_cl.tcl
+[`dbg.tcl`]:      dbg.tcl
+[`rdbg.tcl`]:     rdbg.tcl
+[`xdbg.tcl`]:     xdbg.tcl
+[`xdbg-gui.tcl`]: xdbg-gui.tcl
+
 ### Binary State – Polled
 
 Under Linux it is state of the art to represent I/O-pins via a device driver as (pseudo-) file, which then can be
@@ -34,7 +43,7 @@ file:
 echo 0000 >port_pins
 ```
 
-in the directory which is the current directory when you run `emb1.tcl` (the "server") and `emb1_cl.tcl` (the client).
+in the directory which is the current directory when you run `emb1.tcl` (the server) and `emb1_cl.tcl` (the client).
 
 Start the former first in the background
 ```
@@ -53,16 +62,16 @@ To keep things easy some assumptions are hard-wired in the Tcl code, especially 
 (`tclsh` and `wish`), if such are different on your system, simply change the files accordingly or name the
 interpreter explicitly:
 ```
-tclsh emb1.tcl & wish tcl1_cl.sh
+tclsh emb1.tcl & wish emb1_cl.sh
 ```
 
 If you want to go beyond a simple demo on a single PC, you will also need to adapt the IP addresses and maybe the port
 numbers used for the TCP/IP socket, but this should be obvious from a cursory look at the code, you need not be a
 Tcl expert to do this.
 
-#### `emb1.tcl`
+#### [`emb1.tcl`]
 
-Despite it is a really brief Tcl program, this "server" is able to **connect to any number of `emb1_cl.tcl` clients**
+Despite it is a really brief Tcl program, the server is able to **connect to any number of `emb1_cl.tcl` clients**
 and will care for
 
 * reflecting state changes in the file `port_pins` from the file to each client,
@@ -85,7 +94,7 @@ too, but only in Tcl, and you can profit from it as Vivado user! IMHO the second
 "Non-Tclers") were to acquire competence with JavaScript and use node.js on the embedded side, but that's just my
 2 cent ...]
 
-#### `emb1_cl.tcl`
+#### [`emb1_cl.tcl`]
 
 This implements the client with a GUI but has even less lines of code as the server! If you are fluent in C++ and Qt
 you may be able to beat it, but again, if you need to learn Qt only to do THIS, better stick with Tk, it is extremely
@@ -157,7 +166,7 @@ intending to use Tcl with Vivado). Instead, a more serious practical issue were 
 on the FPGA side must be taken care of, e.g. by purging a number of old values when the consumer (at the read-end
 of the pseudo device in Linux) is not able to keep pace.
 
-#### emb2_cl.tcl
+#### `emb2_cl.tcl`
 
 As the input and output (`dac_value` and `dac_value`) are a distinct source and sink, this client too handles
 incoming and outgoing values differently:
