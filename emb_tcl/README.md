@@ -225,7 +225,7 @@ basic to slightly advanced.
 **All three are designed with the same interface to the application, so the decision which one to use may be made
 (and changed) at any time, just by changing one line of code (or alternatively by renaming a file).
 
-#### The Basics: `dbg.tcl`
+#### The Basics: [`dbg.tcl`]
 
 Trace messages have already become evident from watching the output to the terminal (console) when one of the
 server applications ([`emb1.tcl`] and [`emb2.tcl`]) runs. Here is some output captured after start-up of
@@ -303,25 +303,25 @@ function not only to find out its own name but also the name of its caller.
 and which messages will actually terminate the program is not that hard and left as an exercise to the reader.)
 
 A final little gem to show before advancing to a slightly more elaborate way of viewing trace and debug output can
-be find where the file `dbg.tcl` is included into the server application (close to its end):
+be find where the file [`dbg.tcl`] is included into the server application (close to its end):
 ```
 if {[catch {source dbg.tcl}]} {proc dbg args {}}
 ```
 
 What is this?
 
-It is a nifty way to either include the content of the file `dbg.tcl` but if that fails it nevertheless defines the
-subroutine `dbg`, to accept any number of arguments, but doing nothing in its body.
+It is a nifty way to either include the content of the file [`dbg.tcl`] but if that fails it nevertheless defines
+the subroutine `dbg`, to accept any number of arguments, but doing nothing in its body.
 
-So, if `dbg.tcl` isn't present, no debug output at all will be generated (only program execution is slowed down by
+So, if [`dbg.tcl`] isn't present, no debug output at all will be generated (only program execution is slowed down by
 a tiny amount of time wherever the now "useless" subroutine `dbg` is called.
 
-Try it now – maybe rename `dbg.tcl` to `bdbg.tcl` … (with the `b` standing for **b**asic debugging support, as now
+Try it now – maybe rename [`dbg.tcl`] to `bdbg.tcl` … (with the `b` standing for **b**asic debugging support, as now
 is the time to turn to a more elaborate way of viewing the trace output).
 
-#### Viewing Debug-Traces Remotely: `rdbg.tcl` and `rdbg-gui.tcl`
+#### Viewing Debug-Traces Remotely: [`rdbg.tcl`] and `rdbg-gui.tcl`
 
-First of all: `rdbg.tcl` and `rdbg-gui.tcl` are actually the identical, i.e. the first is the file and the second
+First of all: [`rdbg.tcl`] and `rdbg-gui.tcl` are actually the identical, i.e. the first is the file and the second
 just a symbolic link (alias name). Keep it in mind, though this will get important a little later.
 
 The main thing changed here from the perspective of the application making trace output available to interested
@@ -341,7 +341,7 @@ The other good news is this: all you need to change in your application is that 
 ```
 if {[catch {source rdbg.tcl}]} {proc dbg args {}}
 ```
-so that now `rdbg.tcl` is included. This actually changes the implementation of `dbg` to use a socket connection,
+so that now [`rdbg.tcl`] is included. This actually changes the implementation of `dbg` to use a socket connection,
 **if some viewer is present at the configured port**.
 
 Again, please note that these demo applications are meant for setting forth the idea, and a production solution
@@ -362,7 +362,7 @@ So, effectively it depends on whether the viewer runs or not, to get or discard 
 **A note to those who worry about efficiency:**
 
 Obviously it creates runtime (and maybe network) overhead to try to connect to non-existing IP ports. Therefore you
-would probably consider to rename `rdbg.tcl` to something different (or remove the file completely) as long as you
+would probably consider to rename [`rdbg.tcl`] to something different (or remove the file completely) as long as you
 definitely need no trace output, as calling a subroutine with an empty body (as explained at the end of the last
 section).
 
@@ -372,7 +372,7 @@ frequently in a row.
 
 And now for the next question: Where do you find the ominous viewer app?
 
-You have it right there in front of your eyes – it is part of `rdbg.tcl` but will only start running if you call that
+You have it right there in front of your eyes – it is part of [`rdbg.tcl`] but will only start running if you call that
 with a name that ends in `-gui.tcl`, i.e. the alias name already existing as symbolic link!
 
 So start it now:
@@ -380,7 +380,7 @@ So start it now:
 ./rdbg-gui.tcl
 ```
 
-(The configuration section has also been a little extended over `dbg.tcl`, especially you might configure foreground
+(The configuration section has also been a little extended over [`dbg.tcl`], especially you might configure foreground
 and background colours to your taste, but again finding out such details ias left as an exercise to the reader.)
 
 The viewer itself is deliberately kept small and simple, it should only introduce to some more Tk features for GUI
@@ -390,15 +390,15 @@ programming and wet your appetite for more,
 
 … and this time it will be not just some baby-steps, let us take a really big leap (at least when measured in LOC).
 
-#### An Advanced Debug-Trace Viewer: `xdbg.tcl` and `xdbg-gui.tcl`
+#### An Advanced Debug-Trace Viewer: [`xdbg.tcl`] and [`xdbg-gui.tcl`]
 
 Just to give you an idea first: what follows here has been written from scratch in about one working day by a
 *"moderately experienced Tcl/Tk developer"* who knows Tcl/Tk for a bit more than 15 years, but has his most
 current and main experience in the area of C/C++ (=me :-)) Especially I have written NO non-trivial Tcl application
-with a size and complexity comparable to `xdbg-gui.tcl` in the last five years before (though I taught a number of
-Tcl courses during that time).
+with a size and complexity comparable to [`xdbg-gui.tcl`] in the last five years before (though I taught a number
+of Tcl courses during that time).
 
-Contrary to the remote trace viewer introduced in the last section, `xdbg.tcl` and `xdbg-gui,tcl` are different
+Contrary to the remote trace viewer introduced in the last section, [`xdbg.tcl`] and `xdbg-gui,tcl` are different
 files, with the former to be included in the application calling the `dbg` subroutine and the latter implementing
 the viewer with the Tk GUI.
 
@@ -406,9 +406,9 @@ For the latter, writing a small manual may be appropriate, but this will easily 
 program itself and so I defer it for now. Instead I will only give a sketchy description of its behaviour that
 also points out some of its highlights:
 
-* On start-up `xdbg-gui.tcl` shows a single tab which is meant to show "trace output" of itself.
-* When another program is running that has included `xdbg.tcl` generates trace output with calls to `dbg` …
-* … a new tab will be opened by `xdbg-gui.tcl` to view the messages.
+* On start-up [`xdbg-gui.tcl`] shows a single tab which is meant to show "trace output" of itself.
+* When another program is running that has included [`xdbg.tcl`] generates trace output with calls to `dbg` …
+* … a new tab will be opened by [`xdbg-gui.tcl`] to view the messages.
 * All available message categories are listed on the upper part of the left pane, and …
 * … all current messages can be hidden or made visible again by clicking the according check-boxes, or …
 * … permanently removed by clicking on the `×`-buttons.
@@ -416,7 +416,7 @@ also points out some of its highlights:
 * … their names collect in the lower part of the left pane …
 * … and can be shown/hidden or permanently removed in the same way.
 
-Also the configuration in `xdbg.tcl` has been more elaborated and now uses a Tcl `dict`. This allows to use a
+Also the configuration in [`xdbg.tcl`] has been more elaborated and now uses a Tcl `dict`. This allows to use a
 hierarchical style (actually somewhat similar to JSON syntax, but without a colon after the key).
 
 This shows a representative fragment:
