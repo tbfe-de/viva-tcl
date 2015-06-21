@@ -382,10 +382,10 @@ programming and wetten your appetite for more,
 #### An Advanced Debug-Trace Viewer: `xdbg.tcl` and `xdbg-gui.tcl`
 
 Just to give you an idea first: what follows here has been written from scratch in about one working day by a
-*"moderately experienced Tcl/Tk developer"* who knows Tcl/Tk for a bit more than 15 years, but has worked mainly
-with C/C++ in the last five years (= me :-)). Especially **in the last five years I have written NO no non-trivial
-Tcl application** with a size and complexitiy comparable to `xdbg-gui.tcl` in the last five years (though I taught
-a number of Tcl courses during that time).
+*"moderately experienced Tcl/Tk developer"* who knows Tcl/Tk for a bit more than 15 years, but has his most
+current and main experience in the area of C/C++ (=me :-)) Especially I have written NO non-trivial Tcl application
+with a size and complexitiy comparable to `xdbg-gui.tcl` in the last five years before (though I taught a number of
+Tcl courses during that time).
 
 Contrary to the remote trace viewer introduced in the last section, `xdbg.tcl` and `xdbg-gui,tcl` are different
 files, with the former to be included in the application calling the `dbg` subroutine and the latter implemeting
@@ -405,8 +405,10 @@ also points out some of its highlights:
 * … their names collect in the lower part of the left pane …
 * … and can be shown/hidden or permanently removed in the same way.
 
-Also the configuration in `xdbg.tcl` has become more elaborated and now uses a Tcl `dict` which allows for a
-hierachic style (actually somewhat similar to JSON syntax, but without a colon after the key). A fragment follows:
+Also the configuration in `xdbg.tcl` has been more elaborated and now uses a Tcl `dict`. This allows to use a
+hierachic style (actually somewhat similar to JSON syntax, but without a colon after the key).
+
+This shows a representative fragment:
 ```
 set debugMessages {
     FATAL {                         
@@ -428,8 +430,42 @@ set debugMessages {
 
 (To view it fully see the source file – it also has rudimentary documentation on this in the comments above.)
 
-**Besides message colouring also the behavior can be specified via `action` in more detail on a per category base.**
+Besides message colouring also the behavior can be specified via `action` in more detail on a per category base.
+
+Of special interest may be the `action inspect` here, which crosses the border from a pure viewer to an interactive
+inspection tool. Assigning a messages category the `action inspect` will have the following effect:
+
+* Issuing a message from that category cause the application to halt and wait for *inspection commands*.
+* Such are issued from the text entry field at the bottom of the tabs.
+* Any valid Tcl command can be used as *inspection commmand*, and …
+* … **such commands and are executed in the traced application at the stack level of the issuer** …
+* … and their output is displayed in the text area above …
+* … until an empty line is entered.
+
+Though compared to an advanced debugger allowing to set arbitrary breakpoints at source file level this is still a
+rather primitive debugging. Nevertheless the generic style of interaction via Tcl commands is extremely powerul.
+
+Assuming the message that has caused the application to (temporarily) stop comes from subroutine `foo`, it is now
+easy to
+
+* list the source code of that function (with `info body foo`),
+* find out which are its argument names (with `info body args`), or
+* *inspect* or even *change(!)* any argument, local or global variable.
+
+(In fact, while arguments, local, and global variables are typically the ones of interest, Tcl's `uplevel` command
+allows inspection and modification of variables at each stack level.)
 
 ## Conclusion
 
-TBD
+Tcl is a very powerful scripting language.
+
+It might not be considered as a "modern language" (depending on the criteria you choose to apply that label), but
+it is very robust, very portable, and far from being dead or ready to be discarded.
+
+If you are programming an embedded board and want to give it a remote control application with a GUI you need not
+to acquire some degree of expertise in the area of HTTP servers and "typical" server side (PHP) or client side
+(JavaScript) programming languages.
+
+Tcl (and Tk for the GUI) is often fully sufficient, and especially if you are an FPGA developer using a ZYNC-based
+board the experience you gather with Tcl also pays for improving your proficiency in scripting, when you use tools
+like Vivado.
