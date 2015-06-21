@@ -14,8 +14,8 @@
 # - Any change of any of the four state flags will be communicated between
 #   server and client, so that changes on each side becomes visible on the
 #   other side.
-# - Also there may be any number of clients which automatically see the changes
-#   from other clients.
+# - Also there may be any number of clients which automatically see the
+#   changes from other clients.
 #
 # Note: In this example the device state is polled in regular intervals.
 #       (You may want to see "emb2.tcl" (and "emb2_client.tcl") in which the
@@ -39,8 +39,8 @@ set deviceLastState ""
 #
 array set clients {}
 
-# ------------------------------------------------------------------------------
-#                                    Respond to Connection Requests from Clients
+# -----------------------------------------------------------------------------
+#                                   Respond to Connection Requests from Clients
 #
 proc client_connect {fd ip port} {
     dbg INFO "connection request from $ip:$port"
@@ -51,8 +51,8 @@ proc client_connect {fd ip port} {
     fileevent $fd readable [list client_receive $fd]
 }
 
-# ------------------------------------------------------------------------------
-#                                             Receive Changes on the Client Side
+# -----------------------------------------------------------------------------
+#                                            Receive Changes on the Client Side
 #
 proc client_receive {fd} {
     if {[gets $fd state] < 0} {
@@ -101,8 +101,8 @@ proc device_read {_state} {
     return 1
 }
 
-# ------------------------------------------------------------------------------
-#                                                    Send Changes to the Clients
+# -----------------------------------------------------------------------------
+#                                                   Send Changes to the Clients
 #
 proc client_send {what whom} {
     set cnt 0
@@ -122,8 +122,8 @@ proc client_send {what whom} {
     }
 }
 
-# ------------------------------------------------------------------------------
-#                                                    Poll the Device for Changes
+# -----------------------------------------------------------------------------
+#                                                   Poll the Device for Changes
 #
 proc device_poll {} {
     dbg STOP "polling device state"
@@ -138,7 +138,7 @@ proc device_poll {} {
 # -----------------------------------------------------------------------------
 #                                                      Load Debug Output Helper
 #
-if {[catch {source xdbg.tcl}]} {proc dbg args {}}
+if {[catch {source dbg.tcl}]} {proc dbg args {}}
 
 # -----------------------------------------------------------------------------
 #                                                           Start-up Everything

@@ -5,9 +5,9 @@ here.
 
 ### Overview
 
-Four of the examplkes are actually pairs of a *Server* and a matching *Client*, all fully written in Tcl. They
+Four of the examples are actually pairs of a *Server* and a matching *Client*, all fully written in Tcl. They
 demonstrate how an Embedded Board (presumable running under Linux) is enabled to communicate over an TCP/IP stream
-socket an is controled with respect to its state by a remote application with a Tk-based GUI.
+socket an is controlled with respect to its state by a remote application with a Tk-based GUI.
 
 See later sections [Binary State – Polled](#binary-state--polled) and
 [ADC / DAC – Streamed](#adc--dac--streamed) for details.
@@ -22,8 +22,8 @@ Under Linux it is state of the art to represent I/O-pins via a device driver as 
 read or written by any application that is able to operate on (text-) files.
 
 Beyond that little assumptions can be made, e.g. with respect to the data in the pseudo-file, it might be text or
-binary. Here it is assumed that the device driver is our friend, reflecting the current and receiveing a modified
-pin state as usual characters '0' and '1', i.e. ASCII 0x110000 and 0x110001. Thuis makes it content easier in most
+binary. Here it is assumed that the device driver is our friend, reflecting the current and receiving a modified
+pin state as usual characters '0' and '1', i.e. ASCII 0x110000 and 0x110001. This makes it content easier in most
 scripting languages, including Tcl, but only marginally: few lines would have to be added if the state were
 represented in separate bits of a word (8, 16, 32 bit, ...) or a sequence thereof.
 
@@ -78,7 +78,7 @@ echo 1111 >port_pins
 
 and watch how the client(s) update.
 
-[Try this with a full-blown or just a mininal HTTP server on the embedded board, maybe JavaScript on the client, well
+[Try this with a full-blown or just a minimal HTTP server on the embedded board, maybe JavaScript on the client, well
 and then throw in some PHP ... I'm (not really) curious how many lines of code you will need. Anyway you will need to
 acquire competence in a number different areas. Now compare this to the Tcl approach: you need to gather competence
 too, but only in Tcl, and you can profit from it as Vivado user! IMHO the second best approach (or best approach for
@@ -89,7 +89,7 @@ too, but only in Tcl, and you can profit from it as Vivado user! IMHO the second
 
 This implements the client with a GUI but has even less lines of code as the server! If you are fluent in C++ and Qt
 you may be able to beat it, but again, if you need to learn Qt only to do THIS, better stick with Tk, it is extremely
-portable too, though – admitetdly – misses some of the nifty "modern" control elements and hence may appear
+portable too, though – admittedly – misses some of the nifty "modern" control elements and hence may appear
 old-fashioned ... at least in comparison it to the latest super-duper smart phone, advertised from the big sellers
 who want to draw the money from your pockets in intervals of 18 months ...)
 
@@ -103,7 +103,7 @@ will immediately display the state of the others.
 
 ### ADC / DAC – Streamed
 
-These example demonstrates a slightly different approach ot communicate with the state of the embedded device based
+These example demonstrates a slightly different approach to communicate with the state of the embedded device based
 on pseudo files:
 
 * There is one file that "produces" values at random times – i.e. a data source, and
@@ -113,7 +113,7 @@ Again, to keep things simple, the names of these files are hardwired to `dac_val
 change. (Last not least, the examples are rather meant as "proof of concept", but written clean enough to base a
 product solution on them, besides just drawing on the idea.)
 
-To try the demons without a real deivce driver representing a ADC or DAC via such pseudo-files, just create two
+To try the demons without a real device driver representing a ADC or DAC via such pseudo-files, just create two
 named pipes:
 ```
 mkfifo dac_value
@@ -137,12 +137,12 @@ and eventually `jobs` and `kill %n` too).
 #### `emb2.tcl`
 
 Again a really compact server, able to serve as many `emb2_cl.tcl` clients as are started. Other than in `emb1.tcl`
-which usespolling to notice changes on `port_pins` and send updates to the client(s), `emb2.tcl` it is completly
+which uses polling to notice changes on `port_pins` and send updates to the client(s), `emb2.tcl` it is completely
 event-driven:
 
-* Besides the callback registered  via the `socket` command for incomming connection requests, and
+* Besides the callback registered  via the `socket` command for incoming connection requests, and
 * the callback registered with `fileevent` to be notified when data is received over the socket, also
-* **any new values comming in through `adc_value` are received via a callback registered with `fileevent`**.
+* **any new values coming in through `adc_value` are received via a callback registered with `fileevent`**.
 
 Therefore there is no necessity for a compromise between CPU load (generated by busy waiting) and sub-optimal latency.
 
@@ -166,8 +166,8 @@ incoming and outgoing values differently:
 * the second can be set via a slide control (aka. `scale` in Tk terminology).
 
 But as before you may start any number of clients you like, and all will display the same value – the last one fed
-into the `adc_value` pipe – and all will synchronice their slider if it is movre in anyone, and of course each new
-will arrive in `dac_value`, no matter which client set it.
+into the `adc_value` pipe – and all will synchronise their sliders if it is moved in any of them, and of course
+each new will arrive in `dac_value`, no matter which client set it.
 
 Just give it a try!
 
@@ -184,7 +184,7 @@ generated internally too fast to be sent.
 Last and finally a robust design must also consider how far each of both sides – server and client – trusts the
 correct implementation of the other. If there is the necessary amount of mutual trust (for a correct implementation
 and as long as unreliable or deliberately cheating communication partners can be averted in the first place, to avoid
-waiting on output a protocol may be uses n which the producer of some data discards everything until the consumer
+waiting on output a protocol may be uses in which the producer of some data discards everything until the consumer
 has indicated its readiness to receive another chunk of data.
 
 ### Debug-Tracing
@@ -212,7 +212,7 @@ The more sophisticated ideas like the one set forth in the last paragraph may al
 but actually isn't in Tcl, due to its introspection features. The following elaborates three approaches, from very
 basic to slightly advanced.
 
-**All three are designed with the same interface to the application, so the decission which one to use may be made
+**All three are designed with the same interface to the application, so the decision which one to use may be made
 (and changed) at any time, just by changing one line of code (or alternatively by renaming a file).
 
 #### The Basics: `dbg.tcl`
@@ -232,7 +232,7 @@ up to the point where the first client `emb1_cl.tcl` has connected and changed a
 ```
 
 Obviously there is a categorisation included (in square brackets) followed by either the name of the application
-itself or one of its functions, from which the message orginates, up to a colon.
+itself or one of its functions, from which the message originates, up to a colon.
 
 Looking for the points where such messages are sent reveals the unique use of a function `dbg` to generate such
 messages.
@@ -303,7 +303,7 @@ What is this?
 It is a nifty way to either include the content of the file `dbg.tcl` but if that fails it nevertheless defines the
 subroutine `dbg`, to accept any number of arguments, but doing nothing in its body.
 
-So, if `dbg.tcl` isn't pressent, no debug output at all will be generated (only program execution is slowed down by
+So, if `dbg.tcl` isn't present, no debug output at all will be generated (only program execution is slowed down by
 a tiny amount of time wherever the now "useless" subroutine `dbg` is called.
 
 Try it now – maybe rename `dbg.tcl` to `bdbg.tcl` … (with the `b` standing for **b**asic debugging support, as now
@@ -352,15 +352,15 @@ So, effectively it depends on whether the viewer runs or not, to get or discard 
 **A note to those who worry about efficiency:**
 
 Obviously it creates runtime (and maybe network) overhead to try to connect to non-existing IP ports. Therefore you
-would probably consider to rename `rdbg.tcl` to something differen (or remove the file completely) as long as you
-definetly need no trace output, as calling a subroutine with an empty body (as explained at the end of the last
+would probably consider to rename `rdbg.tcl` to something different (or remove the file completely) as long as you
+definitely need no trace output, as calling a subroutine with an empty body (as explained at the end of the last
 section).
 
-But in case there is "usually" a viever running but only somtimes "down" (for any reason), its inavailability is not
+But in case there is "usually" a viewer running but only sometimes "down" (for any reason), its unavailability is not
 considered as "hard" error and there is even some logic to reduce the number of connection requests if they fail
 frequently in a row.
 
-And now for the next question: Where do you find the ominous viever app?
+And now for the next question: Where do you find the ominous viewer app?
 
 You have it right there in front of your eyes – it is part of `rdbg.tcl` but will only start running if you call that
 with a name that ends in `-gui.tcl`, i.e. the alias name already existing as symbolic link!
@@ -370,26 +370,26 @@ So start it now:
 ./rdbg-gui.tcl
 ```
 
-(The configuration section has also been a little extended over `dbg.tcl`, especially you might configure foregrond
+(The configuration section has also been a little extended over `dbg.tcl`, especially you might configure foreground
 and background colours to your taste, but again finding out such details ias left as an exercise to the reader.)
 
-The viewer itself is deliberatly kept small and simple, it should only introduce to some more Tk features for GUI
-programming and wetten your appetite for more,
+The viewer itself is deliberately kept small and simple, it should only introduce to some more Tk features for GUI
+programming and wet your appetite for more,
 
 … which follows now …
 
-… and this time it will be not just some baby-steps, let us take a really big leap (at least when meassured in LOC).
+… and this time it will be not just some baby-steps, let us take a really big leap (at least when measured in LOC).
 
 #### An Advanced Debug-Trace Viewer: `xdbg.tcl` and `xdbg-gui.tcl`
 
 Just to give you an idea first: what follows here has been written from scratch in about one working day by a
 *"moderately experienced Tcl/Tk developer"* who knows Tcl/Tk for a bit more than 15 years, but has his most
 current and main experience in the area of C/C++ (=me :-)) Especially I have written NO non-trivial Tcl application
-with a size and complexitiy comparable to `xdbg-gui.tcl` in the last five years before (though I taught a number of
+with a size and complexity comparable to `xdbg-gui.tcl` in the last five years before (though I taught a number of
 Tcl courses during that time).
 
 Contrary to the remote trace viewer introduced in the last section, `xdbg.tcl` and `xdbg-gui,tcl` are different
-files, with the former to be included in the application calling the `dbg` subroutine and the latter implemeting
+files, with the former to be included in the application calling the `dbg` subroutine and the latter implementing
 the viewer with the Tk GUI.
 
 For the latter, writing a small manual may be appropriate, but this will easily take more time as writing the
@@ -400,14 +400,14 @@ also points out some of its highlights:
 * When another program is running that has included `xdbg.tcl` generates trace output with calls to `dbg` …
 * … a new tab will be opened by `xdbg-gui.tcl` to view the messages.
 * All available message categories are listed on the upper part of the left pane, and …
-* … all current messages can be hidden or made visible again by clicking the according checkboxes, or …
+* … all current messages can be hidden or made visible again by clicking the according check-boxes, or …
 * … permanently removed by clicking on the `×`-buttons.
 * Moreover, as soon as messages come in from specific subroutines …
 * … their names collect in the lower part of the left pane …
 * … and can be shown/hidden or permanently removed in the same way.
 
 Also the configuration in `xdbg.tcl` has been more elaborated and now uses a Tcl `dict`. This allows to use a
-hierachic style (actually somewhat similar to JSON syntax, but without a colon after the key).
+hierarchical style (actually somewhat similar to JSON syntax, but without a colon after the key).
 
 This shows a representative fragment:
 ```
@@ -438,13 +438,13 @@ inspection tool. Assigning a messages category the `action inspect` will have th
 
 * Issuing a message from that category cause the application to halt and wait for *inspection commands*.
 * Such are issued from the text entry field at the bottom of the tabs.
-* Any valid Tcl command can be used as *inspection commmand*, and …
+* Any valid Tcl command can be used as *inspection command*, and …
 * … **such commands and are executed in the traced application at the stack level of the issuer** …
 * … and their output is displayed in the text area above …
 * … until an empty line is entered.
 
 Though compared to an advanced debugger allowing to set arbitrary breakpoints at source file level this is still a
-rather primitive debugging. Nevertheless the generic style of interaction via Tcl commands is extremely powerul.
+rather primitive debugging. Nevertheless the generic style of interaction via Tcl commands is extremely powerful.
 
 Assuming the message that has caused the application to (temporarily) stop comes from subroutine `foo`, it is now
 easy to
@@ -464,7 +464,7 @@ It might not be considered as "modern language" (depending on the criteria you c
 it is **very robust**, **very portable**, and far from being dead or ready to be trashed.
 
 Also its "shell-style" approach (with minimal syntax and nearly everything implemented via its "library") may not
-match everybodies taste, but those who get around this will usually appreciate the flat learning curve with a very
+match everybody's taste, but those who get around this will usually appreciate the flat learning curve with a very
 low initial step.
 
 Tcl's readiness for productive use has often been demonstrated, once more here, with the examples shown mainly aiming
@@ -481,7 +481,7 @@ even be carried around on a memory stick.
 
 **Hence, purging the necessity of an HTTP server on the embedded device and a browser on the remote side, with all
 the intricacies following from it, like potential security wholes – typically in widely distributed software you
-depend on and requiring an urgent fix once it is publicly knwon – a remote control application in form of
+depend on and requiring an urgent fix once it is publicly known – a remote control application in form of
 specialised software may even be considered a boon, but a burden (and anyway a very minimal one).
 
 Tcl on the embedded device combined with and Tk for the GUI is fully sufficient, and especially if you are an FPGA

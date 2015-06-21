@@ -39,7 +39,7 @@ set deviceLastValue_out 0
 array set clients {} 
 
 # -----------------------------------------------------------------------------
-#                                    Respond to Connection Requests from Clients
+#                                   Respond to Connection Requests from Clients
 #
 proc client_connect {fd ip port} {
     dbg INFO "connection request from $ip:$port"
@@ -49,8 +49,8 @@ proc client_connect {fd ip port} {
     fileevent $fd readable [list client_receive $fd]
 }
 
-# ------------------------------------------------------------------------------
-#                                             Receive Changes on the Client Side
+# -----------------------------------------------------------------------------
+#                                            Receive Changes on the Client Side
 #
 proc client_receive {fd} {
     if {[gets $fd value] < 0} {
@@ -101,7 +101,7 @@ proc adc_attach {} {
 }
 
 # -----------------------------------------------------------------------------
-#                                                      Read Values from the ADC 
+#                                                      Read Values from the ADC
 #
 proc adc_read {} {
     if {[eof $::adc_fd]} {
@@ -123,8 +123,8 @@ proc adc_read {} {
     client_send "i=$value" [array names ::clients]
 }
 
-# ------------------------------------------------------------------------------
-#                                                    Send Changes to the Clients
+# -----------------------------------------------------------------------------
+#                                                   Send Changes to the Clients
 #
 proc client_send {what whom} {
     set cnt 0
