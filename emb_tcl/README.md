@@ -285,20 +285,150 @@ proc dbg {severity message} {
 }
 ```
 
-The solution to the puzzle is the use of one of Tcl's powerful introspection feature, that allows any function not
-only to find out its own name but also the name of its caller.
+The solution to the puzzle is the use `info level`, one of Tcl's powerful introspection features, that allows any
+function not only to find out its own name but also the name of its caller.
 
 (Reviewing the `dbg` function further and finding out how it can be configured with respect to the messages shown
 and which messages will actually terminate the program is not that hard and left as an exercise to the reader.)
 
+A final little gem to show before advancing to a slightly more elaborate way of viewing trace and debug output can
+be find where the file `dbg.tcl` is included into the server application (close to its end):
+```
+if {[catch {source dbg.tcl}]} {proc dbg args {}}
+```
+
+What is this?
+
+It is a nifty way to either include the content of the file `dbg.tcl` but if that fails it nevertheless defines the
+subroutine `dbg`, to accept any number of arguments, but doing nothing in its body.
+
+So, if `dbg.tcl` isn't pressent, no debug output at all will be generated (only program execution is slowed down by
+a tiny amount of time wherever the now "useless" subroutine `dbg` is called.
+
+Try it now – maybe rename `dbg.tcl` to `bdbg.tcl` … (with the `b` standing for **b**asic debugging support, as now
+is the time to turn to a more elaborate way of viewing the trace output).
 
 #### Viewing Debug-Traces Remotely: `rdbg.tcl` and `rdbg-gui.tcl`
 
-TBD
+First of all: `rdbg.tcl` and `rdbg-gui.tcl` are actually the identical, i.e. the first is the file and the second
+just a symbolic link (alias name). Keep it in mind, though this will get important a little later.
+
+The main thing changed here from the perspective of the application making trace output available to interested
+parties is …
+
+* … **nothing** if it comes to calling the subroutine `dbg` (i.e. "no change in the API"),
+* but nevertheless substantial when it comes to viewing messages, which is now possible anywhere in the network.
+ 
+**Remember:**
+
+This series started out motivated as an example where the "servers" run on an embedded board and though you might
+have some way to watch its console output, e.g. over an `ssh` connection or serial line, wouldn't it be nice to
+avoid cluttering these connections with trace messages and have them freely available for other purposes? (Or, if
+you go over USB from RS232, to avoid having to use these sometimes cumbersome and whimsical port converters?)
+
+The other good news is this: all you need to change in your application is that one line
+```
+if {[catch {source rdbg.tcl}]} {proc dbg args {}}
+```
+so that now `rdbg.tcl` is included. This actually changes the implementation of `dbg` to use a socket connection,
+**if some viewer is present at the configured port**.
+
+Again, please note that these demo applications are meant for setting forth the idea, and a production solution
+might need some polishing, like configurable ip numbers and ports, which are hardwired here in the configuration
+section:
+```
+set debugRemoteGUI 127.0.0.1:55669
+```
+
+So, what happens now if `emb1.tcl` or `emb2.tcl` is started?
+
+* As soon as it wants to send out its first trace message it will try to contact the viewer application on the same
+  host (`127.0.0.1` is just another way to say `localhost`) at port `55669` …
+* … and if there is no one listening at that port, nothing at all happens.
+
+So, effectively it depends on whether the viewer runs or not, to get or discard any trace output.
+
+**A note to those who worry about efficiency:**
+
+Obviously it creates runtime (and maybe network) overhead to try to connect to non-existing IP ports. Therefore you
+would probably consider to rename `rdbg.tcl` to something differen (or remove the file completely) as long as you
+definetly need no trace output, as calling a subroutine with an empty body (as explained at the end of the last
+section).
+
+But in case there is "usually" a viever running but only somtimes "down" (for any reason), its inavailability is not
+considered as "hard" error and there is even some logic to reduce the number of connection requests if they fail
+frequently in a row.
+
+And now for the next question: Where do you find the ominous viever app?
+
+You have it right there in front of your eyes – it is part of `rdbg.tcl` but will only start running if you call that
+with a name that ends in `-gui.tcl`, i.e. the alias name already existing as symbolic link!
+
+So start it now:
+```
+./rdbg-gui.tcl
+```
+
+(The configuration section has also been a little extended over `dbg.tcl`, especially you might configure foregrond
+and background colours to your taste, but again finding out such details ias left as an exercise to the reader.)
+
+The viewer itself is deliberatly kept small and simple, it should only introduce to some more Tk features for GUI
+programming and wetten your appetite for more,
+
+… which follows now …
+
+… and this time it will be not just some baby-steps, let us take a really big leap (at least when meassured in LOC).
 
 #### An Advanced Debug-Trace Viewer: `xdbg.tcl` and `xdbg-gui.tcl`
 
-TBD
+Just to give you an idea first: what follows here has been written from scratch in about one working day by a
+*"moderately experienced Tcl/Tk developer"* who knows Tcl/Tk for a bit more than 15 years, but has worked mainly
+with C/C++ in the last five years (= me :-)). Especially **in the last five years I have written NO no non-trivial
+Tcl application** with a size and complexitiy comparable to `xdbg-gui.tcl` in the last five years (though I taught
+a number of Tcl courses during that time).
+
+Contrary to the remote trace viewer introduced in the last section, `xdbg.tcl` and `xdbg-gui,tcl` are different
+files, with the former to be included in the application calling the `dbg` subroutine and the latter implemeting
+the viewer with the Tk GUI.
+
+For the latter, writing a small manual may be appropriate, but this will easily take more time as writing the
+program itself and so I defer it for now. Instead I will only give a sketchy description of its behaviour that
+also points out some of its highlights:
+
+* On start-up `xdbg-gui.tcl` shows a single tab which is meant to show "trace output" of itself.
+* When another program is running that has included `xdbg.tcl` generates trace output with calls to `dbg` …
+* … a new tab will be opened by `xdbg-gui.tcl` to view the messages.
+* All available message categories are listed on the upper part of the left pane, and …
+* … all current messages can be hidden or made visible again by clicking the according checkboxes, or …
+* … permanently removed by clicking on the `×`-buttons.
+* Moreover, as soon as messages come in from specific subroutines …
+* … their names collect in the lower part of the left pane …
+* … and can be shown/hidden or permanently removed in the same way.
+
+Also the configuration in `xdbg.tcl` has become more elaborated and now uses a Tcl `dict` which allows for a
+hierachic style (actually somewhat similar to JSON syntax, but without a colon after the key). A fragment follows:
+```
+set debugMessages {
+    FATAL {                         
+        action die
+        colors violet/white 
+    }
+    ERROR {
+        action show 
+        colors red/white
+    }
+    …
+    STOP {
+        action inspect
+        hide true
+        colors black/white
+    }
+}
+```
+
+(To view it fully see the source file – it also has rudimentary documentation on this in the comments above.)
+
+**Besides message colouring also the behavior can be specified via `action` in more detail on a per category base.**
 
 ## Conclusion
 
