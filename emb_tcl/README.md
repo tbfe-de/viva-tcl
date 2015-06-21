@@ -43,8 +43,8 @@ file:
 echo 0000 >port_pins
 ```
 
-in the directory which is the current directory when you run [`emb1.tcl`] (the server) and [`emb1_cl.tcl`]
-(the client).
+in the directory which is the current directory when you run [`emb1.tcl`] – the server, and [`emb1_cl.tcl`]
+– the client.
 
 Start the former first in the background
 ```
