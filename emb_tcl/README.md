@@ -5,16 +5,16 @@ here.
 
 ### Overview
 
-Four of the examplkes are actually pairs of a "server" and a matching "client", all fully written in Tcl. They
-demonstrate how an Embedded Board (presumable running under Linux) might communicate an be controlde with respect
-to its state by a remote application, based on a TK-GUI.
+Four of the examplkes are actually pairs of a *Server* and a matching *Client*, all fully written in Tcl. They
+demonstrate how an Embedded Board (presumable running under Linux) is enabled to communicate over an TCP/IP stream
+socket an is controled with respect to its state by a remote application with a Tk-based GUI.
 
 See later sections [Binary State – Polled](#binary-state--polled) and
 [ADC / DAC – Streamed](#adc--dac--streamed) for details.
 
-The other three examples deal with debug tracing in various comfortable way. Note that these are NOT meant to compete
-with (semi-) professional Tcl-IDEs and -debuggers, they just shall demonstrate how MUCH you can do with only a LITTLE
-bit of Tcl/Tk-Code.
+The other three examples deal with [Debug-Tracing](#debug-tracing) in various ways. Note that these are NOT meant
+to compete with (semi-) professional Tcl-IDEs and -debuggers, they just shall demonstrate how *MUCH* you can do with
+only a *LITTLE* bit of Tcl/Tk-Code.
 
 ### Binary State – Polled
 
