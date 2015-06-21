@@ -1,7 +1,7 @@
 ## Code-Walk
 
 This directory contains seven examples total, which are introduced in the presentation and explained in more detail
-now.
+here.
 
 ### Overview
 
@@ -9,7 +9,8 @@ Four of the examplkes are actually pairs of a "server" and a matching "client", 
 demonstrate how an Embedded Board (presumable running under Linux) might communicate an be controlde with respect
 to its state by a remote application, based on a TK-GUI.
 
-See later sections "Binary State – Polled" and "ADC / DAC – Streamed" for details.
+See later sections [Binary State – Polled](#binary-state--polled) and
+[ADC / DAC – Streamed](#adc--dac--streamed) for details.
 
 The other three examples deal with debug tracing in various comfortable way. Note that these are NOT meant to compete
 with (semi-) professional Tcl-IDEs and -debuggers, they just shall demonstrate how MUCH you can do with only a LITTLE
@@ -459,13 +460,30 @@ allows inspection and modification of variables at each stack level.)
 
 Tcl is a very powerful scripting language.
 
-It might not be considered as a "modern language" (depending on the criteria you choose to apply that label), but
-it is very robust, very portable, and far from being dead or ready to be discarded.
+It might not be considered as "modern language" (depending on the criteria you choose to apply that label), but
+it is **very robust**, **very portable**, and far from being dead or ready to be trashed.
 
-If you are programming an embedded board and want to give it a remote control application with a GUI you need not
-to acquire some degree of expertise in the area of HTTP servers and "typical" server side (PHP) or client side
-(JavaScript) programming languages.
+Also its "shell-style" approach (with minimal syntax and nearly everything implemented via its "library") may not
+match everybodies taste, but those who get around this will usually appreciate the flat learning curve with a very
+low initial step.
 
-Tcl (and Tk for the GUI) is often fully sufficient, and especially if you are an FPGA developer using a ZYNC-based
-board the experience you gather with Tcl also pays for improving your proficiency in scripting, when you use tools
-like Vivado.
+Tcl's readiness for productive use has often been demonstrated, once more here, with the examples shown mainly aiming
+to demonstrate a decent number of Tcl features in the server, and of Tk in the clients and in the debug viewers.
+
+If you are programming an embedded device, especially one based on Linux, and you want to give it a remote control 
+application with a GUI, you need not acquire any expertise in the area of HTTP servers or programming languages
+"typically" used on the server side (PHP) or the client side (JavaScript).
+
+If you think it is a downside that you "need some software besides a browser" on the remote side (controlling the
+embedded device), i.e. `wish` (`tclsh` bundled with Tk) **plus** a Tcvl/Tk application (similar to the `*_cl.tcl`
+clients shown here), it may be of interest to learn that both can be bundled into a single executable file that may
+even be carried around on a memory stick. 
+
+**Hence, purging the necessity of an HTTP server on the embedded device and a browser on the remote side, with all
+the intricacies following from it, like potential security wholes – typically in widely distributed software you
+depend on and requiring an urgent fix once it is publicly knwon – a remote control application in form of
+specialised software may even be considered a boon, but a burden (and anyway a very minimal one).
+
+Tcl on the embedded device combined with and Tk for the GUI is fully sufficient, and especially if you are an FPGA
+developer using a ZYNC-based board, the experience you gather with Tcl also pays for improving your proficiency in
+scripting tools like Vivado.
