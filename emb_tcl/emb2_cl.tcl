@@ -19,7 +19,7 @@ label .in\
 scale .out\
     -length 200\
     -orient horizontal\
-    -from -99 -to 99\
+    -from 0 -to 9999\
     -variable dac_out\
     -command send_new_value
 pack .out -side bottom -fill x
@@ -34,24 +34,30 @@ proc connect_embedded {} {
 	puts stderr "cannot connect to $embeddedHostIP:$embeddedPortNr"
         exit
     }
-    set ::emb_socket $sockfd
+    fconfigure $sockfd -blocking 0 -translation binary
     fileevent $sockfd readable [list receive_new_state]
+    set ::emb_socket $sockfd
 }
 
 # -----------------------------------------------------------------------------
 #                                                   Get Changes from the Server
 #
 proc receive_new_state {} {
-    if {[gets $::emb_socket io_value] < 0} {
+    gets $::emb_socket io_value
+    if {[eof $::emb_socket]} {
         exit
     }
-    if {![regexp {^([io])=(-?\d+)$} $io_value dummy io value]} {
+    if {[fblocked $::emb_socket]} {
+        return
+    }
+    if {![regexp {^([io])=(\d{1,4})$} $io_value dummy io value]} {
 	puts stderr "received invalid value update \"$io_value\""
         return
     }
     switch -exact $io {
         i { set ::adc_in $value }
-        o { set ::dac_out $value }
+        o { scan $value %d value ;# get rid of leading zeroes
+            set ::dac_out $value }
     }
 }
 

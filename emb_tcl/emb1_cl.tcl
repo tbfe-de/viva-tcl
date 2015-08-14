@@ -40,6 +40,7 @@ proc connect_embedded {} {
         exit
     }
     set ::emb_socket $sockfd
+    fconfigure $sockfd -blocking 0 -translation binary
     fileevent $sockfd readable [list receive_new_state]
 }
 
@@ -47,8 +48,16 @@ proc connect_embedded {} {
 #                                                   Get Changes from the Server
 #
 proc receive_new_state {} {
-    if {[gets $::emb_socket state] != [llength $::name_list]} {
+    gets $::emb_socket state
+    if {[eof $::emb_socket]} {
         exit
+    }
+    if {[fblocked $::emb_socket]} {
+        return
+    }
+    if {[string length $state] != [llength $::name_list]} {
+        return ;# protocoll error - ignore
+        # exit ;# (somewhat harder alternative)
     }
     foreach n $::name_list s [split $state ""] {
         set ::state($n) $s

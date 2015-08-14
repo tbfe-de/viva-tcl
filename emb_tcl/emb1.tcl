@@ -48,6 +48,7 @@ proc client_connect {fd ip port} {
     if {[device_read currentstate]} {
         client_send $currentstate $fd
     }
+    fconfigure $fd -blocking 0 -translation binary
     fileevent $fd readable [list client_receive $fd]
 }
 
@@ -55,10 +56,15 @@ proc client_connect {fd ip port} {
 #                                            Receive Changes on the Client Side
 #
 proc client_receive {fd} {
-    if {[gets $fd state] < 0} {
+    gets $fd state ;# just read, checking results follows
+    if {[eof $fd]} {
         close $fd
         dbg INFO "unregistering client $::clients($fd)"
         array unset ::clients($fd)
+        return
+    }
+    if {[fblocked $fd]} {
+        dbg TRACE "incomplete message from client $::clients($fd)"
         return
     }
     if {![regexp "^$::deviceFileFormat$" $state]} {

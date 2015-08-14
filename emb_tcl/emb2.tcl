@@ -26,9 +26,9 @@
 set serverIpPortNr 55668
 set deviceFile_ADC adc_value
 set deviceFile_DAC dac_value
-set deviceFileFormat {-?[0-9]+}
-set deviceLastValue_in 0
-set deviceLastValue_out 0
+set deviceFileFormat {[0-9]{1,4}}
+set deviceLastValue_in 500
+set deviceLastValue_out 250
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #             USUALLY NOTHING NEEDS TO BE CHANGED BELOW THAT LINE
@@ -44,20 +44,25 @@ array set clients {}
 proc client_connect {fd ip port} {
     dbg INFO "connection request from $ip:$port"
     set ::clients($fd) $ip:$port
-    client_send "i=$::deviceLastValue_in" $fd
-    client_send "o=$::deviceLastValue_out" $fd
+    fconfigure $fd -blocking 0 -translation binary
     fileevent $fd readable [list client_receive $fd]
+    client_send i $::deviceLastValue_in $fd
+    client_send o $::deviceLastValue_out $fd
 }
 
 # -----------------------------------------------------------------------------
 #                                            Receive Changes on the Client Side
 #
 proc client_receive {fd} {
-    if {[gets $fd value] < 0} {
+    gets $fd value
+    if {[eof $fd]} {
         close $fd
         dbg INFO "unregistering client $::clients($fd)"
         array unset ::clients($fd)
         return
+    }
+    if {[fblocked $fd]} {
+        return ;# incomplete message (yet)
     }
     if {![regexp "^$::deviceFileFormat$" $value]} {
         dbg ERROR "received invalid data from $::clients($fd): \"$value\""
@@ -69,7 +74,7 @@ proc client_receive {fd} {
         # alternative to consider: make a fatal error
         return
     }
-    client_send "o=$value" [array names ::clients]
+    client_send o $value [array names ::clients]
 }
 
 # -----------------------------------------------------------------------------
@@ -117,19 +122,20 @@ proc adc_read {} {
     }
     if {![regexp "^$::deviceFileFormat$" $value]} {
         dbg WARN "ignored invalid adc-data from $::deviceFile_ADC: \"$value\""
-        return 0
+        return
     }
     set ::deviceLastValue_in $value
-    client_send "i=$value" [array names ::clients]
+    client_send i $value [array names ::clients]
 }
 
 # -----------------------------------------------------------------------------
 #                                                   Send Changes to the Clients
 #
-proc client_send {what whom} {
+proc client_send {what value whom} {
     set cnt 0
+    set msg [format "%s=%04d" $what $value]
     foreach clientfd $whom {
-        if {[catch {puts $clientfd $what; flush $clientfd} message]} {
+        if {[catch {puts $clientfd $msg; flush $clientfd} message]} {
             dbg ERROR "cannot write socket to $::clients($clientfd): $message"
             dbg WARN "closing socket to $::clients($clientfd)"
             close $clientfd
@@ -140,7 +146,7 @@ proc client_send {what whom} {
         incr cnt
     }
     if {$cnt > 0} {
-        dbg INFO "updated $cnt clients with new value \"$what\""
+        dbg INFO "updated $cnt clients with new value \"$msg\""
     }
 }
 
