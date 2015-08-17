@@ -22,8 +22,15 @@ scale .out\
     -from 0 -to 9999\
     -variable dac_out\
     -command send_new_value
+button .quit\
+     -text QUIT\
+     -command exit
+pack .quit -side bottom -fill x
 pack .out -side bottom -fill x
 pack .in -side top -fill both -expand 1
+
+# for keyboard short-cut to quit add this:
+bind . <Alt-Key-q> exit
 
 # -----------------------------------------------------------------------------
 #                                                             Connect to Server

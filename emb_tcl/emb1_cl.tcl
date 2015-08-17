@@ -29,6 +29,7 @@ foreach {cb name} {
             -command send_new_state
     ] -sticky w
 }
+grid [button .quit -text QUIT -command exit] -sticky ew
 
 # -----------------------------------------------------------------------------
 #                                                             Connect to Server
