@@ -54,7 +54,7 @@ proc receive {conn} {
         close $fd
         unset ::fd($conn)
         dbg INFO "connection closed to $conn"
-        add_message $conn "--- disconnected $conn ([time_stamp])---"
+        add_message $conn "--- disconnected $conn ([time_stamp]) ---"
         set w $::applications($conn)
         $w.display.commands configure -state disabled
         return
@@ -87,11 +87,18 @@ proc insert_message {w message tags} {
 # -----------------------------------------------------------------------------
 #                                             called from GUI to clear messages
 #
-proc clear_messages {w {name ""}} {
+proc clear_messages {conn {name ""}} {
+    set w $::applications($conn)
     $w.display.messages configure -state normal
     if {[string equal $name ""]} {
         delete_messages $w [list 1.0 end]
-        dbg INFO "cleared all messages in tab$w"
+        if {[string equal $conn xdbg-gui]
+         || [info exists ::fd($conn)]} {
+            dbg INFO "cleared all messages in tab$w"
+        } else {
+            .master forget $w
+            dbg INFO "completely removed tab$w"
+        }
     } else {
         delete_messages $w [$w.display.messages tag ranges $name]
         dbg INFO "cleared messages in tab$w: $name"
@@ -141,7 +148,7 @@ proc send_command {conn} {
 # -----------------------------------------------------------------------------
 #                                         create GUI part for message selection
 #
-proc create_selection {w subw name {bg_fg {}}} {
+proc create_selection {conn w subw name {bg_fg {}}} {
     if {[info exists ::hide($name$w)]
      || ![string is alnum $name]} {
         return ;# selection already exists
@@ -164,7 +171,7 @@ proc create_selection {w subw name {bg_fg {}}} {
     #
     button $w.control.$subw.c$name\
         -text × -padx 0 -pady 0\
-        -command [list clear_messages $w $name]
+        -command [list clear_messages $conn $name]
     if {[llength $bg_fg] > 0} {
         $w.control.$subw.c$name configure\
             -background [lindex $bg_fg 0]\
@@ -183,7 +190,10 @@ proc create_connection {conn} {
 
     # prepare the paned window with control zone (left) and the display frame
     #
-    set w .[array size ::applications]
+    for {set i 0} {$i < [array size ::applications]} {incr i} {
+        if {![winfo exists .$i]} break
+    }
+    set w .$i
     panedwindow $w -orient horizontal
     .master add $w -text $conn ;# -sticky nsew
     panedwindow $w.control -orient vertical
@@ -226,7 +236,7 @@ proc create_connection {conn} {
         -text "Show Severities" -anchor w
     button $w.control.sev.c\
         -text × -padx 0 -pady 0\
-        -command [list clear_messages $w]
+        -command [list clear_messages $conn]
     grid $w.control.sev.h $w.control.sev.c -sticky we ;# ... and bring into place
 
     # create selections for severities (includes bringing into place)
@@ -234,7 +244,7 @@ proc create_connection {conn} {
     foreach sev [dict keys $::debugMessages] {
         if {[string equal [string index $sev 0] #]} continue
         set bg_fg [split [dict get $::debugMessages $sev colors] /]
-        create_selection $w sev $sev $bg_fg
+        create_selection $conn $w sev $sev $bg_fg
         $w.display.messages tag configure $sev\
             -background [lindex $bg_fg 0]\
             -foreground [lindex $bg_fg 1]
@@ -315,7 +325,7 @@ proc add_message {conn message} {
         set tags [list]
     }
     if {[info exists procname]} {
-        create_selection $w proc $procname
+        create_selection $conn $w proc $procname
         lappend tags $procname
     }
 
@@ -334,6 +344,7 @@ proc add_message {conn message} {
         }
     }
 }
+
 
 # -----------------------------------------------------------------------------
 #                                                       start-up GUI and socket
