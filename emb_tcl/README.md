@@ -39,32 +39,28 @@ represented in separate bits of a word (8, 16, 32 bit, ...) or a sequence thereo
 To try the examples without any device driver presenting real I/O-pins as pseudo-file, just create an ordinary text
 file:
 
-```
-echo 0000 >port_pins
-```
+    echo 0000 >port_pins
 
 in the directory which is the current directory when you run [`emb1.tcl`] – the server, and [`emb1_cl.tcl`]
 – the client.
 
 Start the former first in the background
-```
-./emb1.tcl &
-```
+
+    ./emb1.tcl &
+
 
 then the latter:
 
-```
-./emb1_cl.tcl
-```
+    ./emb1_cl.tcl
 
 **Note:**
 
 To keep things easy some assumptions are hard-wired in the Tcl code, especially the path name to the interpreters
 (`tclsh` and `wish`), if such are different on your system, simply change the files accordingly or name the
 interpreter explicitly:
-```
-tclsh emb1.tcl & wish emb1_cl.sh
-```
+
+    tclsh emb1.tcl & wish emb1_cl.sh
+
 
 If you want to go beyond a simple demo on a single PC, you will also need to adapt the IP addresses and maybe the port
 numbers used for the TCP/IP socket, but this should be obvious from a cursory look at the code, you need not be a
@@ -81,10 +77,9 @@ and will care for
 
 So, what you may want to try now is change the file `port_pins` by
 
-```
-echo 0101 >port_pins
-echo 1111 >port_pins
-```
+
+   echo 0101 >port_pins
+   echo 1111 >port_pins
 
 and watch how the client(s) update.
 
@@ -104,9 +99,8 @@ old-fashioned ... at least in comparison it to the latest super-duper smart phon
 who want to draw the money from your pockets in intervals of 18 months ...)
 
 So, what you may want to try now is to click the check-boxes and watch how the file changes by doing a
-```
-cat port_pins
-```
+
+    cat port_pins
 
 and if this gets boring, start some more [`emb1_cl.tcl`] clients and watch how changing the check-boxes in any of it
 will immediately display the state of the others.
@@ -125,24 +119,43 @@ product solution on them, besides just drawing on the idea.)
 
 To try the demons without a real device driver representing a ADC or DAC via such pseudo-files, just create two
 named pipes:
-```
-mkfifo dac_value
-mkfifo adc_value
-```
 
-Then connect the first on with a `cat`-command that shows any value written to it and prepare to supply values for
-the second one via the keyboard:
-```
-cat -u <dac_value &  # <--- note the '&' for background execution!
-cat -u >adc_value    # <--- NO '&' as you want to supply values!
-```
+    mkfifo dac_value
+    mkfifo adc_value
+
+Then connect the first on with a `cat`-command that shows any value written to `dac_value`:
+
+    cat <dac_value
+
+Keep this running and on a *second* terminal connect to the second to write values to `adc_value`:
+
+    cat -u >adc_value
+
+(The option `-u` is typically not any more necessary on modern Linux systems but still understood (or rather
+ignored; it is necessary for some older versions to copy everything typed on the keyboard *unbuffered* to the
+named pipe.)
+
+For the moment, keep this running too and on a *third* terminal start the server (`./emb2.tcl`) together with
+any number of clients (`./emb2_cl.tcl`).
+
+**Note:**
+
+The above `cat`-commands are necessary be started **before** the server is started, and they need to be running
+**while** the server runs. (The server will not start if the named pipes do not exist, and it may show spurious
+"retry"-messages or even hang if the `cat`-commands are terminated while the server is running.)
+
+Now you can observe the following:
+
+* When you move the slider on *any* client, it moves to the same position on *every* other client too.
+* When you type a numeric value (0 .. 9999) on the *second* terminal and followed the RETURN-key (or ENTER), the value will be shown by *all* clients.
 
 **Hint:**
 
-You may also do the above from different terminals (consoles). This would help to avoid confusing what is input and
-what is output. But you are well able to do everything from a single terminal, though in this case it will probably
-pay to first get comfortable with the job control features of your shell (i.e. `CTRL-Z`, `fg` and `bg` commands,
-and eventually `jobs` and `kill %n` too).
+You may also do all what is described here from a single terminal, using the job-control features of your shell (i.e.
+`CTRL-Z`, `fg` and `bg` commands and eventually `jobs` and `kill %n` too). Only, it may quickly get confusing to
+understand the origin of the output shown, and you might also easily stop an essential `cat` command or even
+inadvertently terminate it. But if you don't have several terminals (say, you run a single `ssh` session and want to
+try this directly on an embedded Linux board, and if you are comfortable with job-control then go ahead.
 
 #### [`emb2.tcl`]
 
@@ -204,7 +217,7 @@ shown here can also be easily written in a text editor (the well-known ones ofte
 programming languages, including a Tcl-mode).
 
 To understand the reason for a misbehaving program, then during development output statements are inserted at the
-points of interest. (This is why this technique is often called`printf`-debugging in C, and hence might be called
+points of interest. (This is why this technique is often called `printf`-debugging in C, and hence might be called
 `puts` debugging in Tcl.)
 
 A slightly more systematic approach is to sprinkle a program with trace output at all its strategic points, like
@@ -231,15 +244,13 @@ Trace messages have already become evident from watching the output to the termi
 server applications ([`emb1.tcl`] and [`emb2.tcl`]) runs. Here is some output captured after start-up of
 [`emb1.tcl`] up to the point where the first client [`emb1_cl.tcl`] has connected and changed a pin value:
 
-```
-[INFO] ./emb1.tcl: set-up to listen for connection requests at port 55667
-[INFO] ./emb1.tcl: set-up to poll port-pins port_pins every 100 msec
-[INFO] ./emb1.tcl: starting event loop now ...
-[INFO] client_connect: connection request from 127.0.0.1:60118
-[INFO] client_send: updated 1 clients with new device state "0010"
-[INFO] client_receive: written "1010" to port_pins
-[INFO] client_send: updated 1 clients with new device state "1010"
-```
+    [INFO] ./emb1.tcl: set-up to listen for connection requests at port 55667
+    [INFO] ./emb1.tcl: set-up to poll port-pins port_pins every 100 msec
+    [INFO] ./emb1.tcl: starting event loop now ...
+    [INFO] client_connect: connection request from 127.0.0.1:60118
+    [INFO] client_send: updated 1 clients with new device state "0010"
+    [INFO] client_receive: written "1010" to port_pins
+    [INFO] client_send: updated 1 clients with new device state "1010"
 
 Obviously there is a categorisation included (in square brackets) followed by either the name of the application
 itself or one of its functions, from which the message originates, up to a colon.
@@ -248,53 +259,50 @@ Looking for the points where such messages are sent reveals the unique use of a 
 messages.
 
 This is a fragment from the end of [`emb1.tcl`] (outside any function):
-```
-dbg INFO "set-up to listen for connection requests at port $serverIpPortNr"
-socket -server client_connect $serverIpPortNr
 
-dbg INFO "set-up to poll port-pins $deviceFileName every $deviceFilePoll msec"
-after 0 device_poll
+    dbg INFO "set-up to listen for connection requests at port $serverIpPortNr"
+    socket -server client_connect $serverIpPortNr
 
-dbg INFO "starting event loop now ..."
-vwait forever
-```
+    dbg INFO "set-up to poll port-pins $deviceFileName every $deviceFilePoll msec"
+    after 0 device_poll
+
+    dbg INFO "starting event loop now ..."
+    vwait forever
 
 And here are some lines from `client_receive` (the dots … indicated where more lines from this function have
 been elided):
-```
-proc client_receive {fd} {
-    if {[gets $fd state] < 0} {
-        close $fd
-        dbg INFO "unregistering client $::clients($fd)"
-        …
-    }
-    …
-    dbg TRACE "opened $::deviceFileName for writing"
-    …
-    dbg INFO "written \"$state\" to $::deviceFileName"
-}
-```
 
-Obvioulsy the category is the first argument to `dbg` and the message itself the second argument, **though without
+    proc client_receive {fd} {
+        if {[gets $fd state] < 0} {
+            close $fd
+            dbg INFO "unregistering client $::clients($fd)"
+            …
+        }
+        …
+        dbg TRACE "opened $::deviceFileName for writing"
+        …
+        dbg INFO "written \"$state\" to $::deviceFileName"
+    }
+
+Obviously the category is the first argument to `dbg` and the message itself the second argument, **though without
 the application or function name!**
 
 How can that work?
 
 As the function `dbg` is not defined by the application itself but in the file `dbg.tcl`, the solution can be seen
 here (again only showing the relevant fragment):
-```
-proc dbg {severity message} {
-    …
-    set level [info level]
-    if {$level == 1} {
-        set caller $::argv0
-    } else {
-        set caller [lindex [info level [expr {$level-1}]] 0]
+
+    proc dbg {severity message} {
+        …
+        set level [info level]
+        if {$level == 1} {
+            set caller $::argv0
+        } else {
+            set caller [lindex [info level [expr {$level-1}]] 0]
+        }
+        puts $::debugChannel "\[$severity] $caller: $message"
+        …
     }
-    puts $::debugChannel "\[$severity] $caller: $message"
-    …
-}
-```
 
 The solution to the puzzle is the use `info level`, one of Tcl's powerful introspection features, that allows any
 function not only to find out its own name but also the name of its caller.
@@ -304,9 +312,8 @@ and which messages will actually terminate the program is not that hard and left
 
 A final little gem to show before advancing to a slightly more elaborate way of viewing trace and debug output can
 be find where the file [`dbg.tcl`] is included into the server application (close to its end):
-```
-if {[catch {source dbg.tcl}]} {proc dbg args {}}
-```
+
+    if {[catch {source dbg.tcl}]} {proc dbg args {}}
 
 What is this?
 
@@ -338,18 +345,18 @@ avoid cluttering these connections with trace messages and have them freely avai
 you go over USB from RS232, to avoid having to use these sometimes cumbersome and whimsical port converters?)
 
 The other good news is this: all you need to change in your application is that one line
-```
-if {[catch {source rdbg.tcl}]} {proc dbg args {}}
-```
+
+    if {[catch {source rdbg.tcl}]} {proc dbg args {}}
+
 so that now [`rdbg.tcl`] is included. This actually changes the implementation of `dbg` to use a socket connection,
 **if some viewer is present at the configured port**.
 
 Again, please note that these demo applications are meant for setting forth the idea, and a production solution
-might need some polishing, like configurable ip numbers and ports, which are hardwired here in the configuration
+might need some polishing, like configurable IP numbers and ports, which are hardwired here in the configuration
 section:
-```
-set debugRemoteGUI 127.0.0.1:55669
-```
+
+    set debugRemoteGUI 127.0.0.1:55669
+
 
 So, what happens now if [`emb1.tcl`] or [`emb2.tcl`] is started?
 
@@ -370,18 +377,17 @@ But in case there is "usually" a viewer running but only sometimes "down" (for a
 considered as "hard" error and there is even some logic to reduce the number of connection requests if they fail
 frequently in a row.
 
-And now for the next question: Where do you find the ominous viewer app?
+And now for the next question: Where do you find the ominous viewer application?
 
 You have it right there in front of your eyes – it is part of [`rdbg.tcl`] but will only start running if you call that
 with a name that ends in `-gui.tcl`, i.e. the alias name already existing as symbolic link!
 
 So start it now:
-```
-./rdbg-gui.tcl
-```
+
+    ./rdbg-gui.tcl
 
 (The configuration section has also been a little extended over [`dbg.tcl`], especially you might configure foreground
-and background colours to your taste, but again finding out such details ias left as an exercise to the reader.)
+and background colours to your taste, but again finding out such details is left as an exercise to the reader.)
 
 The viewer itself is deliberately kept small and simple, it should only introduce to some more Tk features for GUI
 programming and wet your appetite for more,
@@ -420,24 +426,23 @@ Also the configuration in [`xdbg.tcl`] has been more elaborated and now uses a T
 hierarchical style (actually somewhat similar to JSON syntax, but without a colon after the key).
 
 This shows a representative fragment:
-```
-set debugMessages {
-    FATAL {                         
-        action die
-        colors violet/white 
+
+    set debugMessages {
+        FATAL {                         
+            action die
+            colors violet/white 
+        }
+        ERROR {
+            action show 
+            colors red/white
+        }
+        …
+        STOP {
+            action inspect
+            hide true
+            colors black/white
+        }
     }
-    ERROR {
-        action show 
-        colors red/white
-    }
-    …
-    STOP {
-        action inspect
-        hide true
-        colors black/white
-    }
-}
-```
 
 (To view it fully see the source file – it also has rudimentary documentation on this in the comments above.)
 
@@ -485,15 +490,15 @@ application with a GUI, you need not acquire any expertise in the area of HTTP s
 "typically" used on the server side (PHP) or the client side (JavaScript).
 
 If you think it is a downside that you "need some software besides a browser" on the remote side (controlling the
-embedded device), i.e. `wish` (`tclsh` bundled with Tk) **plus** a Tcvl/Tk application (similar to the `*_cl.tcl`
+embedded device), i.e. `wish` (`tclsh` bundled with Tk) **plus** a Tcl/Tk application (similar to the `*_cl.tcl`
 clients shown here), it may be of interest to learn that both can be bundled into a single executable file that may
 even be carried around on a memory stick. 
 
 **Hence, purging the necessity of an HTTP server on the embedded device and a browser on the remote side, with all
 the intricacies following from it, like potential security wholes – typically in widely distributed software you
 depend on and requiring an urgent fix once it is publicly known – a remote control application in form of
-specialised software may even be considered a boon, but a burden (and anyway a very minimal one).
+specialised software may even be considered a boon, but a burden (and anyway a very minimal one).**
 
 Tcl on the embedded device combined with and Tk for the GUI is fully sufficient, and especially if you are an FPGA
-developer using a ZYNC-based board, the experience you gather with Tcl also pays for improving your proficiency in
+developer using a ZYNQ-based board, the experience you gather with Tcl also pays for improving your proficiency in
 scripting tools like Vivado.
